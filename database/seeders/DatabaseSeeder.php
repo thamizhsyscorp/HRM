@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             HrmDatabaseSeeder::class,
-            SampleUserSeeder::class,
+            SuperAdminSeeder::class,
         ]);
     }
 }
