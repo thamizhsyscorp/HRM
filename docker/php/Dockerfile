@@ -31,10 +31,17 @@ COPY --from=composer:2.8 /usr/bin/composer /usr/bin/composer
 
 COPY docker/php/local.ini /usr/local/etc/php/conf.d/local.ini
 
+# Install PHP dependencies first (leverages Docker layer caching)
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+
+# Copy application code
 COPY --chown=www-data:www-data . /var/www/html
 
-RUN mkdir -p /var/www/html/storage/framework/{sessions,views,cache} \
-    /var/www/html/bootstrap/cache \
+# Run post-install scripts now that artisan and app files are present
+RUN composer dump-autoload --optimize \
+    && mkdir -p /var/www/html/storage/framework/{sessions,views,cache} \
+        /var/www/html/bootstrap/cache \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
