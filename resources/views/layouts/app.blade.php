@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="{{ asset('js/html5-qrcode.min.js') }}"></script>
+    <script src="{{ asset('js/html5-qrcode.min.js') }}?v=1.2"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -676,8 +676,10 @@
 
             if (modal) modal.classList.remove('hidden');
 
-            // Immediately start camera engine on user click
-            startScannerEngine(true);
+            // Wait 80ms for modal DOM reflow and layout before requesting camera
+            setTimeout(() => {
+                startScannerEngine(true);
+            }, 80);
         }
 
         // Acquire GPS Location smoothly in background
@@ -706,7 +708,7 @@
             const laserLine = document.getElementById('qrLaserLine');
 
             if (camDot) camDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse';
-            if (camText) camText.innerText = 'Camera: Starting...';
+            if (camText) camText.innerText = 'Camera: Requesting...';
 
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 if (camDot) camDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
@@ -725,24 +727,33 @@
                     throw new Error('Html5Qrcode library not loaded');
                 }
 
-                if (!html5QrScanner) {
-                    html5QrScanner = new Html5Qrcode("qr-scanner-view");
-                } else if (html5QrScanner.isScanning) {
-                    try { await html5QrScanner.stop(); } catch(e) {}
+                // Cleanly release any existing scanner instance to prevent ongoing transition collisions
+                if (html5QrScanner) {
+                    try {
+                        if (html5QrScanner.isScanning) {
+                            await html5QrScanner.stop();
+                        }
+                        await html5QrScanner.clear();
+                    } catch(e) {}
+                    html5QrScanner = null;
                 }
 
+                // Reset container element DOM
+                const viewEl = document.getElementById('qr-scanner-view');
+                if (viewEl) viewEl.innerHTML = '';
+
+                // Create fresh scanner instance
+                html5QrScanner = new Html5Qrcode("qr-scanner-view");
+
+                // Full-frame scanning without restrictively small or 0-dimension qrbox
                 const config = {
                     fps: 20,
-                    qrbox: function(viewfinderWidth, viewfinderHeight) {
-                        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                        const qrboxEdge = Math.floor(minEdge * 0.85);
-                        return { width: qrboxEdge, height: qrboxEdge };
-                    },
                     disableFlip: currentCameraFacing === "environment"
                 };
 
-                // Primary attempt: use facingMode (environment for back camera)
                 let started = false;
+
+                // 1. Primary attempt: using facingMode (environment for rear camera)
                 try {
                     await html5QrScanner.start(
                         { facingMode: currentCameraFacing },
@@ -752,36 +763,41 @@
                     );
                     started = true;
                 } catch (camErr) {
-                    console.warn("Facing mode start failed, checking available cameras:", camErr);
-                }
+                    console.warn("Camera start with facingMode failed:", camErr);
 
-                // Fallback attempt: enumerate devices if facingMode didn't start
-                if (!started) {
+                    // 2. Fallback attempt: recreate instance and try user/front camera
                     try {
-                        const devices = await Html5Qrcode.getCameras();
-                        if (devices && devices.length > 0) {
-                            const targetCam = currentCameraFacing === "environment"
-                                ? (devices.find(d => /back|rear|environment|world/i.test(d.label)) || devices[devices.length - 1])
-                                : (devices.find(d => /front|user|facing/i.test(d.label)) || devices[0]);
-
-                            await html5QrScanner.start(targetCam.id, config, onScanSuccess, () => {});
-                            started = true;
+                        if (html5QrScanner) {
+                            try { await html5QrScanner.clear(); } catch(e) {}
+                            html5QrScanner = null;
                         }
-                    } catch (enumErr) {
-                        console.warn("Device enumeration failed:", enumErr);
+                        if (viewEl) viewEl.innerHTML = '';
+                        html5QrScanner = new Html5Qrcode("qr-scanner-view");
+
+                        currentCameraFacing = currentCameraFacing === "environment" ? "user" : "environment";
+                        await html5QrScanner.start(
+                            { facingMode: currentCameraFacing },
+                            config,
+                            onScanSuccess,
+                            () => {}
+                        );
+                        started = true;
+                    } catch (fallbackErr) {
+                        console.warn("Camera fallback failed:", fallbackErr);
+                        throw camErr; // Bubble up original error for detailed diagnostics
                     }
                 }
 
-                // Last-resort fallback: try user (front) camera
-                if (!started) {
-                    currentCameraFacing = "user";
-                    await html5QrScanner.start(
-                        { facingMode: "user" },
-                        config,
-                        onScanSuccess,
-                        () => {}
-                    );
-                    started = true;
+                // Ensure video element plays inline on iOS Safari
+                if (viewEl) {
+                    const videoEl = viewEl.querySelector('video');
+                    if (videoEl) {
+                        videoEl.setAttribute('playsinline', 'true');
+                        videoEl.setAttribute('webkit-playsinline', 'true');
+                        videoEl.setAttribute('autoplay', 'true');
+                        videoEl.setAttribute('muted', 'true');
+                        videoEl.play().catch(() => {});
+                    }
                 }
 
                 isScannerRunning = true;
@@ -792,19 +808,200 @@
                 if (camText) camText.innerText = 'Camera: Scanning Active';
 
                 // Query GPS location in background without blocking camera UI
-                setTimeout(acquireGpsLocation, 400);
+                setTimeout(acquireGpsLocation, 500);
 
             } catch (err) {
                 console.error("Camera startup error:", err);
                 isScannerRunning = false;
                 if (promptBox) promptBox.classList.remove('hidden');
                 if (promptDesc) {
-                    promptDesc.innerHTML = '<span class="text-rose-400 font-bold">Camera Access Blocked</span><br><span class="text-[11px] text-slate-300">Tap the <strong>aA</strong> / padlock icon in your browser address bar ➔ <strong>Website Settings</strong> ➔ <strong>Camera: Allow</strong>, then tap button below.</span>';
+                    const errName = err ? (err.name || '') : '';
+                    const errMsg = err ? (err.message || String(err)) : '';
+
+                    if (errName === 'NotAllowedError' || errMsg.includes('Permission') || errMsg.includes('NotAllowedError')) {
+                        promptDesc.innerHTML = '<span class="text-rose-400 font-bold">Camera Access Denied</span><br><span class="text-[11px] text-slate-300 leading-relaxed mt-1 block">Safari has blocked camera access for this site.<br><br>👉 <strong>How to Enable in Safari:</strong><br>1. Tap the <strong>aA</strong> icon in your address bar<br>2. Tap <strong>Website Settings</strong><br>3. Set <strong>Camera</strong> to <strong>Allow</strong><br>4. Tap <strong>Allow Camera & Scan</strong> below.</span>';
+                    } else {
+                        promptDesc.innerHTML = `<span class="text-rose-400 font-bold">Camera Access Blocked</span><br><span class="text-[11px] text-slate-300 leading-relaxed mt-1 block">${errMsg ? errMsg : 'Tap the aA icon in your address bar ➔ Website Settings ➔ Camera: Allow, then tap button below.'}</span>`;
+                    }
                 }
                 if (camDot) camDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
                 if (camText) camText.innerText = 'Camera: Blocked';
             }
         }
+
+        // Switch Camera (Rear <-> Front)
+        async function switchCamera() {
+            currentCameraFacing = currentCameraFacing === "environment" ? "user" : "environment";
+            if (html5QrScanner && html5QrScanner.isScanning) {
+                try {
+                    await html5QrScanner.stop();
+                    isScannerRunning = false;
+                } catch(e) {}
+            }
+            await startScannerEngine(true);
+        }
+
+        // Close QR Scanner
+        async function closeQrScanner() {
+            const modal = document.getElementById('qrScannerModal');
+            if (modal) modal.classList.add('hidden');
+
+            if (html5QrScanner && html5QrScanner.isScanning) {
+                try {
+                    await html5QrScanner.stop();
+                    await html5QrScanner.clear();
+                } catch(e) {}
+            }
+            isScannerRunning = false;
+            const targetFrame = document.getElementById('qrTargetFrame');
+            const laserLine = document.getElementById('qrLaserLine');
+            if (targetFrame) targetFrame.classList.add('hidden');
+            if (laserLine) laserLine.classList.add('hidden');
+            isProcessingScan = false;
+        }
+
+        // Restart Scanner after error
+        function restartQrScanner() {
+            const overlay = document.getElementById('qrStatusOverlay');
+            if (overlay) overlay.classList.add('hidden');
+            isProcessingScan = false;
+            startScannerEngine(true);
+        }
+
+        // Handle Successful Scan
+        function onScanSuccess(decodedText) {
+            if (isProcessingScan) return;
+            isProcessingScan = true;
+
+            // Haptic vibration feedback
+            if (navigator.vibrate) {
+                try { navigator.vibrate([80, 40, 80]); } catch(e) {}
+            }
+
+            // Stop camera while processing
+            if (html5QrScanner && html5QrScanner.isScanning) {
+                try { html5QrScanner.stop().catch(() => {}); } catch(e) {}
+            }
+
+            // Show Verifying Overlay
+            const overlay = document.getElementById('qrStatusOverlay');
+            const iconEl = document.getElementById('qrStatusIcon');
+            const titleEl = document.getElementById('qrStatusTitle');
+            const msgEl = document.getElementById('qrStatusMessage');
+            const retryBtn = document.getElementById('qrRetryBtn');
+
+            if (overlay) overlay.classList.remove('hidden');
+            if (retryBtn) retryBtn.classList.add('hidden');
+            if (iconEl) {
+                iconEl.className = 'w-16 h-16 rounded-2xl bg-[#1e3a8a] text-white text-3xl flex items-center justify-center mb-3.5 font-bold shadow-lg animate-spin';
+                iconEl.innerText = '⏳';
+            }
+            if (titleEl) titleEl.innerText = 'Verifying Attendance...';
+            if (msgEl) msgEl.innerText = 'Matching today\'s office QR signature and recording attendance...';
+
+            // Ensure GPS is available or fallback fast
+            if (currentGpsPosition) {
+                submitQrPunch(decodedText, currentGpsPosition);
+            } else if (navigator.geolocation) {
+                let locationHandled = false;
+                const gpsTimer = setTimeout(() => {
+                    if (!locationHandled) {
+                        locationHandled = true;
+                        submitQrPunch(decodedText, { latitude: 0, longitude: 0, accuracy: null });
+                    }
+                }, 2000);
+
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        if (!locationHandled) {
+                            locationHandled = true;
+                            clearTimeout(gpsTimer);
+                            currentGpsPosition = pos.coords;
+                            submitQrPunch(decodedText, pos.coords);
+                        }
+                    },
+                    (err) => {
+                        if (!locationHandled) {
+                            locationHandled = true;
+                            clearTimeout(gpsTimer);
+                            submitQrPunch(decodedText, { latitude: 0, longitude: 0, accuracy: null });
+                        }
+                    },
+                    { enableHighAccuracy: true, timeout: 2000, maximumAge: 60000 }
+                );
+            } else {
+                submitQrPunch(decodedText, { latitude: 0, longitude: 0, accuracy: null });
+            }
+        }
+
+        // Submit Punch to Server
+        function submitQrPunch(qrToken, coords) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            fetch("{{ route('attendance.qr-punch') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({
+                    qr_token: qrToken,
+                    latitude: coords.latitude,
+                    longitude: coords.longitude,
+                    accuracy: coords.accuracy,
+                    action: currentPunchAction,
+                })
+            })
+            .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, body: data })))
+            .then(({ status, ok, body }) => {
+                const iconEl = document.getElementById('qrStatusIcon');
+                const titleEl = document.getElementById('qrStatusTitle');
+                const msgEl = document.getElementById('qrStatusMessage');
+                const retryBtn = document.getElementById('qrRetryBtn');
+
+                if (ok && (body.status === 'success' || body.status === 'info')) {
+                    if (iconEl) {
+                        iconEl.className = 'w-16 h-16 rounded-2xl bg-emerald-500 text-white text-3xl flex items-center justify-center mb-3.5 font-bold shadow-lg';
+                        iconEl.innerText = '✓';
+                    }
+                    if (titleEl) {
+                        titleEl.innerText = body.action === 'CHECK_IN' ? 'Check-In Successful! 🟢' : (body.action === 'CHECK_OUT' ? 'Check-Out Successful! 🔴' : 'Attendance Verified!');
+                    }
+                    if (msgEl) {
+                        msgEl.innerText = body.message;
+                    }
+
+                    // Reload page after 1.5s to reflect updated attendance status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    if (iconEl) {
+                        iconEl.className = 'w-16 h-16 rounded-2xl bg-rose-500 text-white text-3xl flex items-center justify-center mb-3.5 font-bold shadow-lg';
+                        iconEl.innerText = '✕';
+                    }
+                    if (titleEl) titleEl.innerText = 'Verification Failed';
+                    if (msgEl) msgEl.innerText = body.message || 'Could not verify attendance. Please try again.';
+                    if (retryBtn) retryBtn.classList.remove('hidden');
+                }
+            })
+            .catch(err => {
+                const iconEl = document.getElementById('qrStatusIcon');
+                const titleEl = document.getElementById('qrStatusTitle');
+                const msgEl = document.getElementById('qrStatusMessage');
+                const retryBtn = document.getElementById('qrRetryBtn');
+
+                if (iconEl) {
+                    iconEl.className = 'w-16 h-16 rounded-2xl bg-rose-500 text-white text-3xl flex items-center justify-center mb-3.5 font-bold shadow-lg';
+                    iconEl.innerText = '✕';
+                }
+                if (titleEl) titleEl.innerText = 'Network Error';
+                if (msgEl) msgEl.innerText = 'Failed to connect to the server. Please check your internet connection.';
+                if (retryBtn) retryBtn.classList.remove('hidden');
+            });
+        }
+    </script>
 
         // Switch Camera (Rear <-> Front)
         async function switchCamera() {
