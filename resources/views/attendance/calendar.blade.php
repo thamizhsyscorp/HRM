@@ -7,27 +7,27 @@
 <div class="space-y-6">
 
     <!-- HERO PROFILE & MONTH SWITCHER CARD -->
-    <div class="bg-white rounded-2xl border border-slate-100 p-5 sm:p-7 shadow-md">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    <div class="bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             
             <!-- Employee Profile Information -->
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-[#1e3a8a] text-white font-extrabold text-xl flex items-center justify-center shadow-sm shrink-0">
+            <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-xl bg-[#1e3a8a] text-white font-extrabold text-base flex items-center justify-center shadow-xs shrink-0">
                     {{ strtoupper(substr($targetEmployee->first_name, 0, 1) . substr($targetEmployee->last_name ?? '', 0, 1)) }}
                 </div>
                 <div>
-                    <div class="flex flex-wrap items-center gap-2 mb-1">
-                        <span class="text-xs font-extrabold uppercase tracking-wider text-[#1e3a8a] bg-[#eff6ff] px-2.5 py-0.5 rounded-full border border-[#bfdbfe]">
+                    <div class="flex flex-wrap items-center gap-2 mb-0.5">
+                        <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#1e3a8a] bg-[#eff6ff] px-2 py-0.5 rounded-full border border-[#bfdbfe]">
                             {{ $targetEmployee->department->name ?? 'General Department' }}
                         </span>
-                        <span class="text-xs font-mono font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
+                        <span class="text-[11px] font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-md">
                             {{ $targetEmployee->employee_code }}
                         </span>
                     </div>
-                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                    <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
                         {{ $targetEmployee->full_name }}
                     </h2>
-                    <p class="text-xs text-slate-400 font-medium mt-0.5">
+                    <p class="text-[11px] text-slate-400 font-medium">
                         {{ $targetEmployee->designation->name ?? 'Staff Role' }} &bull; {{ $targetEmployee->work_email }}
                     </p>
                 </div>
@@ -84,7 +84,7 @@
         </div>
 
         <!-- Monthly Progress Strip -->
-        <div class="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {{-- <div class="mt-6 pt-5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-4 text-xs">
                 @php
                     $workingDays = $presentCount + $absentCount;
@@ -106,51 +106,51 @@
                     Daily Logs →
                 </a>
             </div>
-        </div>
+        </div> --}}
     </div>
 
     <!-- MONTHLY SUMMARY METRIC CARDS -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-emerald-100 shadow-md flex items-center justify-between">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-emerald-200/70 shadow-2xs flex items-center justify-between">
             <div>
-                <span class="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">Present Days</span>
-                <span class="text-2xl sm:text-3xl font-extrabold text-emerald-700 mt-1 block font-mono">{{ $presentCount }}</span>
+                <span class="text-[10px] sm:text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">Present Days</span>
+                <span class="text-xl sm:text-2xl font-extrabold text-emerald-700 mt-0.5 block font-mono">{{ $presentCount }}</span>
                 <span class="text-[10px] text-slate-400 font-medium">Verified PRESENT</span>
             </div>
-            <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-base border border-emerald-200">
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-black text-sm border border-emerald-200 shrink-0">
                 ✓
             </div>
         </div>
 
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-rose-100 shadow-md flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-rose-200/70 shadow-2xs flex items-center justify-between">
             <div>
-                <span class="text-[11px] font-bold text-rose-800 uppercase tracking-wider block">Absent Days</span>
-                <span class="text-2xl sm:text-3xl font-extrabold text-rose-700 mt-1 block font-mono">{{ $absentCount }}</span>
+                <span class="text-[10px] sm:text-[11px] font-bold text-rose-800 uppercase tracking-wider block">Absent Days</span>
+                <span class="text-xl sm:text-2xl font-extrabold text-rose-700 mt-0.5 block font-mono">{{ $absentCount }}</span>
                 <span class="text-[10px] text-slate-400 font-medium">Recorded ABSENT</span>
             </div>
-            <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-700 flex items-center justify-center font-black text-base border border-rose-200">
+            <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center font-black text-sm border border-rose-200 shrink-0">
                 ✕
             </div>
         </div>
 
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-amber-100 shadow-md flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-amber-200/70 shadow-2xs flex items-center justify-between">
             <div>
-                <span class="text-[11px] font-bold text-amber-900 uppercase tracking-wider block">Company Holidays</span>
-                <span class="text-2xl sm:text-3xl font-extrabold text-amber-700 mt-1 block font-mono">{{ $holidayCount }}</span>
+                <span class="text-[10px] sm:text-[11px] font-bold text-amber-900 uppercase tracking-wider block">Company Holidays</span>
+                <span class="text-xl sm:text-2xl font-extrabold text-amber-700 mt-0.5 block font-mono">{{ $holidayCount }}</span>
                 <span class="text-[10px] text-slate-400 font-medium">Company holidays + Sundays</span>
             </div>
-            <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center font-black text-base border border-amber-200">
+            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center font-black text-sm border border-amber-200 shrink-0">
                 ★
             </div>
         </div>
 
-        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
             <div>
-                <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Total Hours</span>
-                <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono mt-1 block">{{ $totalWorkedHours }}h</span>
+                <span class="text-[10px] sm:text-[11px] font-bold text-slate-600 uppercase tracking-wider block">Total Hours</span>
+                <span class="text-xl sm:text-2xl font-extrabold text-slate-900 font-mono mt-0.5 block">{{ $totalWorkedHours }}h</span>
                 <span class="text-[10px] text-slate-400 font-medium">HOLIDAY & On-duty</span>
             </div>
-            <div class="w-10 h-10 rounded-2xl bg-[#eff6ff] text-[#1e3a8a] flex items-center justify-center font-black text-base border border-[#bfdbfe]">
+            <div class="w-8 h-8 rounded-lg bg-[#eff6ff] text-[#1e3a8a] flex items-center justify-center font-black text-sm border border-[#bfdbfe] shrink-0">
                 ⏱️
             </div>
         </div>

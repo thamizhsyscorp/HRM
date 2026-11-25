@@ -49,7 +49,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="{{ asset('js/html5-qrcode.min.js') }}?v=1.2"></script>
+    <script src="/js/html5-qrcode.min.js?v=2.0" onerror="this.onerror=null;this.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -211,29 +211,24 @@
             </div>
 
             <!-- User Footer Profile Card -->
-            <div class="p-3 border-t border-slate-100 bg-white">
-                <div class="flex items-center justify-between p-1.5 rounded-xl transition">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#1e3a8a] font-extrabold text-xs flex items-center justify-center shrink-0 border border-blue-200">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        </div>
-                        <div class="flex-1 min-w-0 text-left">
-                            <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
-                            <p class="text-[10px] text-slate-400 truncate">{{ auth()->user()->roles->first()->name ?? 'User' }}</p>
-                        </div>
+            <div class="p-3.5 border-t border-slate-100 bg-white">
+                <button 
+                    type="button" 
+                    onclick="toggleProfilePopover(event)" 
+                    class="w-full flex items-center gap-3 p-1 rounded-xl hover:bg-slate-50 transition cursor-pointer text-left group"
+                    title="Account Menu"
+                >
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#1e3a8a] font-extrabold text-xs flex items-center justify-center shrink-0 border border-blue-200 shadow-2xs group-hover:scale-105 transition">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                     </div>
-                    <div class="flex items-center gap-1 shrink-0">
-                        <button type="button" onclick="openChangePasswordModal()" class="text-[11px] font-bold text-slate-500 hover:text-[#1e3a8a] px-2 py-1 rounded-lg hover:bg-slate-100 transition cursor-pointer" title="Change Password">
-                            Password
-                        </button>
-                        <form method="POST" action="{{ route('logout') }}" class="shrink-0">
-                            @csrf
-                            <button type="submit" class="text-[11px] font-bold text-slate-400 hover:text-slate-800 px-2 py-1 rounded-lg hover:bg-slate-100 transition cursor-pointer">
-                                Sign out
-                            </button>
-                        </form>
+                    <div class="flex-1 min-w-0 text-left">
+                        <p class="text-xs font-bold text-slate-900 truncate">{{ auth()->user()->name }}</p>
+                        <p class="text-[10px] text-slate-400 truncate">{{ auth()->user()->roles->first()->name ?? 'User' }}</p>
                     </div>
-                </div>
+                    <svg class="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                    </svg>
+                </button>
             </div>
         </aside>
 
@@ -253,79 +248,126 @@
                             <svg class="w-4 h-4 text-slate-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
                             </svg>
-                            <h1 class="text-sm font-extrabold text-slate-900 tracking-tight">
+                            <h1 class="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight truncate max-w-[130px] sm:max-w-none">
                                 @yield('page_title', 'Dashboard')
                             </h1>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2.5 sm:gap-3.5">
+                    <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
                         <!-- Date chip -->
-                        <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+                        <span class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
                             {{ now()->format('D, M j, Y') }}
                         </span>
 
                         <!-- Notification Bell -->
-                        <a href="{{ route('announcements.index') }}" class="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl transition" title="Bulletins">
+                        <a href="{{ route('announcements.index') }}" class="relative p-1.5 sm:p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl transition" title="Bulletins">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
                             <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500"></span>
                         </a>
 
-                        <!-- Role Badge -->
-                        @if(auth()->user()->hasRole('super-admin'))
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#1e3a8a] border border-blue-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#1e3a8a]"></span> Super Admin
-                            </span>
-                        @elseif(auth()->user()->hasRole('hr-manager'))
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#1e3a8a] border border-blue-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#1e3a8a]"></span> HR Manager
-                            </span>
-                        @else
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                                <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Employee
-                            </span>
-                        @endif
-
-                        <!-- User Profile Initials Circle -->
-                        <div class="w-8 h-8 rounded-full bg-[#1e3a8a] text-white font-extrabold text-xs flex items-center justify-center shadow-xs">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-                        </div>
-
-                        <!-- Change Password Button -->
-                        {{-- <button 
-                            type="button" 
-                            onclick="openChangePasswordModal()" 
-                            class="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-[#1e3a8a] hover:bg-blue-50 transition border border-slate-200 flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                            title="Change account password"
-                        >
-                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-                            </svg>
-                            <span class="hidden sm:inline">Password</span>
-                        </button> --}}
-
-                        <!-- Logout Button -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
+                        <!-- Pop-Style User Profile Trigger & Menu -->
+                        <div class="relative" id="profileDropdownContainer">
                             <button 
-                                type="submit" 
-                                class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition border border-slate-200 flex items-center gap-1.5 cursor-pointer"
-                                title="Sign out"
+                                type="button" 
+                                id="profileDropdownBtn"
+                                onclick="toggleProfilePopover(event)" 
+                                class="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full hover:bg-slate-100 transition border border-slate-200/80 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                title="Account Profile Menu"
                             >
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#1e3a8a] text-white font-extrabold text-[11px] sm:text-xs flex items-center justify-center shadow-xs shrink-0 ring-2 ring-blue-100">
+                                    {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                                </div>
+                                <span class="hidden sm:inline text-xs font-bold text-slate-800 max-w-[100px] truncate">
+                                    {{ auth()->user()->name }}
+                                </span>
+                                <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-150" id="profileChevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                 </svg>
-                                <span class="hidden sm:inline">Logout</span>
                             </button>
-                        </form>
+
+                            <!-- Profile Popover Dropdown Menu -->
+                            <div 
+                                id="profilePopover" 
+                                class="hidden absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 transform origin-top-right transition duration-150"
+                            >
+                                <!-- User Identity Banner -->
+                                <div class="px-4 py-3 border-b border-slate-100 flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#1e3a8a] font-extrabold text-sm flex items-center justify-center shrink-0 border border-blue-200">
+                                        {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-extrabold text-slate-900 truncate">{{ auth()->user()->name }}</p>
+                                        <p class="text-[11px] text-slate-400 truncate">{{ auth()->user()->email }}</p>
+                                        <span class="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-[#1e3a8a] border border-blue-200 font-mono">
+                                            {{ auth()->user()->roles->first()->name ?? 'User' }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="p-1.5 space-y-0.5 text-xs">
+                                    <!-- Change Password (Opens Modal) -->
+                                    <button 
+                                        type="button" 
+                                        onclick="closeProfilePopover(); openChangePasswordModal();" 
+                                        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition cursor-pointer text-left"
+                                    >
+                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                        </svg>
+                                        <span>Change Password</span>
+                                    </button>
+
+                                    <!-- My Salary & Take-Home -->
+                                    <a 
+                                        href="{{ route('payroll.index') }}" 
+                                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
+                                    >
+                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                        </svg>
+                                        <span>My Salary & Take-Home</span>
+                                    </a>
+
+                                    <!-- Calendar & Holidays -->
+                                    <a 
+                                        href="{{ route('attendance.calendar') }}" 
+                                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
+                                    >
+                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <span>Calendar & Holidays</span>
+                                    </a>
+                                </div>
+
+                                <div class="p-1.5 border-t border-slate-100">
+                                    <!-- Sign Out / Logout Form -->
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button 
+                                            type="submit" 
+                                            class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 font-bold transition cursor-pointer text-left text-xs"
+                                        >
+                                            <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                            </svg>
+                                            <span>Sign Out</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
 
             <!-- Main Content Area -->
-            <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1400px] w-full mx-auto">
+            <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-[1400px] w-full mx-auto pb-24 md:pb-8">
                 <!-- Success Flash Alert -->
                 @if (session('success'))
                     <div id="flash-success" class="p-4 rounded-2xl bg-white border border-emerald-200 text-emerald-900 text-sm flex items-center justify-between shadow-soft">
@@ -366,6 +408,66 @@
                 @yield('content')
             </main>
         </div>
+
+        <!-- MOBILE BOTTOM NAVIGATION BAR (md:hidden) -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-1 shadow-lg flex items-center justify-around select-none">
+            <!-- 1. Home / Dashboard -->
+            <a 
+                href="{{ route('dashboard') }}" 
+                class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('dashboard') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+            >
+                <svg class="w-5 h-5 {{ request()->routeIs('dashboard') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-[10px] mt-0.5 tracking-tight">Home</span>
+            </a>
+
+            <!-- 2. Calendar -->
+            <a 
+                href="{{ route('attendance.calendar') }}" 
+                class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('attendance.calendar') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+            >
+                <svg class="w-5 h-5 {{ request()->routeIs('attendance.calendar') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span class="text-[10px] mt-0.5 tracking-tight">Calendar</span>
+            </a>
+
+            <!-- 3. Prominent Quick Scan QR Button -->
+            <button 
+                type="button" 
+                onclick="openQrScanner()" 
+                class="-mt-5 w-12 h-12 rounded-full bg-[#1e3a8a] hover:bg-[#1e40af] text-white flex items-center justify-center shadow-lg border-2 border-white ring-4 ring-blue-100 active:scale-95 transition cursor-pointer"
+                title="Scan QR Attendance"
+            >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+            </button>
+
+            <!-- 4. Payroll / Salary -->
+            <a 
+                href="{{ route('payroll.index') }}" 
+                class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+            >
+                <svg class="w-5 h-5 {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span class="text-[10px] mt-0.5 tracking-tight">Salary</span>
+            </a>
+
+            <!-- 5. Drawer Menu / More -->
+            <button 
+                type="button" 
+                onclick="toggleMobileSidebar()" 
+                class="flex flex-col items-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-slate-700 transition cursor-pointer"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+                <span class="text-[10px] mt-0.5 tracking-tight">Menu</span>
+            </button>
+        </nav>
     </div>
 
     <!-- CHANGE PASSWORD MODAL -->
@@ -518,10 +620,43 @@
             }
         }
 
-        // Close modal on Escape key
+        function toggleProfilePopover(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            const popover = document.getElementById('profilePopover');
+            const chevron = document.getElementById('profileChevron');
+            if (!popover) return;
+            const isHidden = popover.classList.contains('hidden');
+            if (isHidden) {
+                popover.classList.remove('hidden');
+                if (chevron) chevron.classList.add('rotate-180');
+            } else {
+                popover.classList.add('hidden');
+                if (chevron) chevron.classList.remove('rotate-180');
+            }
+        }
+
+        function closeProfilePopover() {
+            const popover = document.getElementById('profilePopover');
+            const chevron = document.getElementById('profileChevron');
+            if (popover) popover.classList.add('hidden');
+            if (chevron) chevron.classList.remove('rotate-180');
+        }
+
+        // Close popover when clicking outside
+        document.addEventListener('click', function(event) {
+            const container = document.getElementById('profileDropdownContainer');
+            if (container && !container.contains(event.target)) {
+                closeProfilePopover();
+            }
+        });
+
+        // Close modal and popovers on Escape key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeChangePasswordModal();
+                closeProfilePopover();
                 closeQrScanner();
             }
         });
@@ -724,7 +859,14 @@
 
             try {
                 if (typeof Html5Qrcode === 'undefined') {
-                    throw new Error('Html5Qrcode library not loaded');
+                    if (camText) camText.innerText = 'Camera: Loading scanner engine...';
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
+                        script.onload = () => resolve();
+                        script.onerror = () => reject(new Error('Html5Qrcode library could not be loaded'));
+                        document.head.appendChild(script);
+                    });
                 }
 
                 // Cleanly release any existing scanner instance to prevent ongoing transition collisions
@@ -828,180 +970,6 @@
                 if (camText) camText.innerText = 'Camera: Blocked';
             }
         }
-
-        // Switch Camera (Rear <-> Front)
-        async function switchCamera() {
-            currentCameraFacing = currentCameraFacing === "environment" ? "user" : "environment";
-            if (html5QrScanner && html5QrScanner.isScanning) {
-                try {
-                    await html5QrScanner.stop();
-                    isScannerRunning = false;
-                } catch(e) {}
-            }
-            await startScannerEngine(true);
-        }
-
-        // Close QR Scanner
-        async function closeQrScanner() {
-            const modal = document.getElementById('qrScannerModal');
-            if (modal) modal.classList.add('hidden');
-
-            if (html5QrScanner && html5QrScanner.isScanning) {
-                try {
-                    await html5QrScanner.stop();
-                    await html5QrScanner.clear();
-                } catch(e) {}
-            }
-            isScannerRunning = false;
-            const targetFrame = document.getElementById('qrTargetFrame');
-            const laserLine = document.getElementById('qrLaserLine');
-            if (targetFrame) targetFrame.classList.add('hidden');
-            if (laserLine) laserLine.classList.add('hidden');
-            isProcessingScan = false;
-        }
-
-        // Restart Scanner after error
-        function restartQrScanner() {
-            const overlay = document.getElementById('qrStatusOverlay');
-            if (overlay) overlay.classList.add('hidden');
-            isProcessingScan = false;
-            startScannerEngine(true);
-        }
-
-        // Handle Successful Scan
-        function onScanSuccess(decodedText) {
-            if (isProcessingScan) return;
-            isProcessingScan = true;
-
-            // Haptic vibration feedback
-            if (navigator.vibrate) {
-                try { navigator.vibrate([80, 40, 80]); } catch(e) {}
-            }
-
-            // Stop camera while processing
-            if (html5QrScanner && html5QrScanner.isScanning) {
-                try { html5QrScanner.stop().catch(() => {}); } catch(e) {}
-            }
-
-            // Show Verifying Overlay
-            const overlay = document.getElementById('qrStatusOverlay');
-            const iconEl = document.getElementById('qrStatusIcon');
-            const titleEl = document.getElementById('qrStatusTitle');
-            const msgEl = document.getElementById('qrStatusMessage');
-            const retryBtn = document.getElementById('qrRetryBtn');
-
-            if (overlay) overlay.classList.remove('hidden');
-            if (retryBtn) retryBtn.classList.add('hidden');
-            if (iconEl) {
-                iconEl.className = 'w-16 h-16 rounded-2xl bg-[#1e3a8a] text-white text-3xl flex items-center justify-center mb-3.5 font-bold shadow-lg animate-spin';
-                iconEl.innerText = '⏳';
-            }
-            if (titleEl) titleEl.innerText = 'Verifying Attendance...';
-            if (msgEl) msgEl.innerText = 'Matching today\'s office QR signature and recording attendance...';
-
-            // Ensure GPS is available or fallback fast
-            if (currentGpsPosition) {
-                submitQrPunch(decodedText, currentGpsPosition);
-            } else if (navigator.geolocation) {
-                let locationHandled = false;
-                const gpsTimer = setTimeout(() => {
-                    if (!locationHandled) {
-                        locationHandled = true;
-                        submitQrPunch(decodedText, { latitude: 0, longitude: 0, accuracy: null });
-                    }
-                }, 2000);
-
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        if (!locationHandled) {
-                            locationHandled = true;
-                            clearTimeout(gpsTimer);
-                            currentGpsPosition = pos.coords;
-                            submitQrPunch(decodedText, pos.coords);
-                        }
-                    },
-                    (err) => {
-                        if (!locationHandled) {
-                            locationHandled = true;
-                            clearTimeout(gpsTimer);
-                            submitQrPunch(decodedText, { latitude: 0, longitude: 0, accuracy: null });
-                        }
-                    },
-                    { enableHighAccuracy: true, timeout: 2000, maximumAge: 60000 }
-                );
-            } else {
-                submitQrPunch(decodedText, { latitude: 0, longitude: 0, accuracy: null });
-            }
-        }
-
-        // Submit Punch to Server
-        function submitQrPunch(qrToken, coords) {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-            fetch("{{ route('attendance.qr-punch') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                },
-                body: JSON.stringify({
-                    qr_token: qrToken,
-                    latitude: coords.latitude,
-                    longitude: coords.longitude,
-                    accuracy: coords.accuracy,
-                    action: currentPunchAction,
-                })
-            })
-            .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, body: data })))
-            .then(({ status, ok, body }) => {
-                const iconEl = document.getElementById('qrStatusIcon');
-                const titleEl = document.getElementById('qrStatusTitle');
-                const msgEl = document.getElementById('qrStatusMessage');
-                const retryBtn = document.getElementById('qrRetryBtn');
-
-                if (ok && (body.status === 'success' || body.status === 'info')) {
-                    if (iconEl) {
-                        iconEl.className = 'w-16 h-16 rounded-2xl bg-emerald-500 text-white text-3xl flex items-center justify-center mb-3.5 font-bold shadow-lg';
-                        iconEl.innerText = '✓';
-                    }
-                    if (titleEl) {
-                        titleEl.innerText = body.action === 'CHECK_IN' ? 'Check-In Successful! 🟢' : (body.action === 'CHECK_OUT' ? 'Check-Out Successful! 🔴' : 'Attendance Verified!');
-                    }
-                    if (msgEl) {
-                        msgEl.innerText = body.message;
-                    }
-
-                    // Reload page after 1.5s to reflect updated attendance status
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    if (iconEl) {
-                        iconEl.className = 'w-16 h-16 rounded-2xl bg-rose-500 text-white text-3xl flex items-center justify-center mb-3.5 font-bold shadow-lg';
-                        iconEl.innerText = '✕';
-                    }
-                    if (titleEl) titleEl.innerText = 'Verification Failed';
-                    if (msgEl) msgEl.innerText = body.message || 'Could not verify attendance. Please try again.';
-                    if (retryBtn) retryBtn.classList.remove('hidden');
-                }
-            })
-            .catch(err => {
-                const iconEl = document.getElementById('qrStatusIcon');
-                const titleEl = document.getElementById('qrStatusTitle');
-                const msgEl = document.getElementById('qrStatusMessage');
-                const retryBtn = document.getElementById('qrRetryBtn');
-
-                if (iconEl) {
-                    iconEl.className = 'w-16 h-16 rounded-2xl bg-rose-500 text-white text-3xl flex items-center justify-center mb-3.5 font-bold shadow-lg';
-                    iconEl.innerText = '✕';
-                }
-                if (titleEl) titleEl.innerText = 'Network Error';
-                if (msgEl) msgEl.innerText = 'Failed to connect to the server. Please check your internet connection.';
-                if (retryBtn) retryBtn.classList.remove('hidden');
-            });
-        }
-    </script>
 
         // Switch Camera (Rear <-> Front)
         async function switchCamera() {

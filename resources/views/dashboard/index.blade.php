@@ -24,12 +24,12 @@
                 <a href="{{ route('attendance.qr-kiosk') }}" target="_blank" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-[#1e3a8a] rounded-xl text-xs font-bold border border-blue-200 transition shadow-2xs flex items-center gap-1.5 cursor-pointer" title="Open Office Daily QR Kiosk Display">
                     <span>Office QR Kiosk 📱</span>
                 </a>
-                <a href="{{ route('employees.create') }}" class="px-4 py-2 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                {{-- <a href="{{ route('employees.create') }}" class="px-4 py-2 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
                     <span>+ Add Employee</span>
-                </a>
+                </a> --}}
             @endif
 
             <a href="{{ route('attendance.calendar') }}" class="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 transition shadow-2xs flex items-center gap-1.5 cursor-pointer">
@@ -43,177 +43,186 @@
 
     @if($isSuperAdmin || $isHr)
         <!-- SUPER ADMIN & HR WORKFORCE METRIC CARDS -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
             <!-- 1. Total Headcount -->
-            <a href="{{ route('employees.index') }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center font-bold text-sm border border-blue-200/60">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('employees.index') }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-blue-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 text-[#1e3a8a] flex items-center justify-center font-bold text-xs border border-blue-200/60">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-extrabold text-[#1e3a8a] bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 font-mono">
+                    <span class="text-[9px] sm:text-[10px] font-extrabold text-[#1e3a8a] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 font-mono">
                         Active
                     </span>
                 </div>
                 <div>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $totalEmployees }}</span>
-                    <span class="text-xs text-slate-500 font-semibold block mt-0.5 group-hover:text-[#1e3a8a] transition">Total Headcount</span>
+                    <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $totalEmployees }}</span>
+                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-[#1e3a8a] transition">Total Headcount</span>
                 </div>
             </a>
 
             <!-- 2. Present Today -->
-            <a href="{{ route('attendance.index') }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm border border-emerald-200/60">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('attendance.index') }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-emerald-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs border border-emerald-200/60">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 font-mono">
+                    <span class="text-[9px] sm:text-[10px] font-extrabold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 font-mono">
                         ● Present
                     </span>
                 </div>
                 <div>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $presentToday }}</span>
-                    <span class="text-xs text-slate-500 font-semibold block mt-0.5 group-hover:text-emerald-700 transition">Present Today</span>
+                    <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $presentToday }}</span>
+                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-emerald-700 transition">Present Today</span>
                 </div>
             </a>
 
             <!-- 3. Leave Today -->
-            <a href="{{ route('leaves.index') }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm border border-amber-200/60">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('leaves.index') }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-amber-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-xs border border-amber-200/60">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-extrabold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-mono">
+                    <span class="text-[9px] sm:text-[10px] font-extrabold text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-mono">
                         ● On Leave
                     </span>
                 </div>
                 <div>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $onLeaveTodayCount }}</span>
-                    <span class="text-xs text-slate-500 font-semibold block mt-0.5 group-hover:text-amber-800 transition">Leave Today</span>
+                    <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $onLeaveTodayCount }}</span>
+                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-amber-800 transition">Leave Today</span>
                 </div>
             </a>
 
             <!-- 4. Pending Leaves -->
-            <a href="{{ route('leaves.index', ['status' => 'PENDING']) }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-sm border border-rose-200/60">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('leaves.index', ['status' => 'PENDING']) }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-rose-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs border border-rose-200/60">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-extrabold text-rose-800 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200 font-mono">
+                    <span class="text-[9px] sm:text-[10px] font-extrabold text-rose-800 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 font-mono">
                         ● Review
                     </span>
                 </div>
                 <div>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $pendingLeavesCount }}</span>
-                    <span class="text-xs text-slate-500 font-semibold block mt-0.5 group-hover:text-rose-700 transition">Pending Leaves</span>
+                    <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $pendingLeavesCount }}</span>
+                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-rose-700 transition">Pending Leaves</span>
                 </div>
             </a>
 
-            <!-- 5. Turnout Rate -->
-            <a href="{{ route('attendance.index') }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center font-bold text-sm border border-blue-200/60">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
+            <!-- 5. Turnout Rate (Spans 2 columns on mobile for balanced grid) -->
+            <a href="{{ route('attendance.index') }}" class="col-span-2 sm:col-span-1 bg-gradient-to-r sm:bg-none from-blue-50/50 via-white to-blue-50/30 bg-white p-3 sm:p-3.5 rounded-xl border border-blue-200/70 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 text-[#1e3a8a] flex items-center justify-center font-bold text-xs border border-blue-200/60 shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <span class="sm:hidden text-xs font-bold text-slate-700">Workforce Attendance Rate</span>
                     </div>
-                    <span class="text-[10px] font-extrabold text-[#1e3a8a] bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 font-mono">
+                    <span class="text-[9px] sm:text-[10px] font-extrabold text-[#1e3a8a] bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 font-mono">
                         Turnout
                     </span>
                 </div>
                 <div>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $turnoutRate }}%</span>
-                    <span class="text-xs text-slate-500 font-semibold block mt-0.5 group-hover:text-[#1e3a8a] transition">Attendance Rate</span>
+                    <div class="flex items-baseline justify-between sm:block">
+                        <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $turnoutRate }}%</span>
+                        <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-[#1e3a8a] transition">Attendance Rate</span>
+                    </div>
+                    <!-- Mobile progress bar indicator -->
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2 sm:hidden overflow-hidden">
+                        <div class="bg-[#1e3a8a] h-1.5 rounded-full" style="width: {{ min(100, max(0, $turnoutRate)) }}%"></div>
+                    </div>
                 </div>
             </a>
         </div>
     @else
         <!-- EMPLOYEE PERSONAL METRIC CARDS -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
             <!-- 1. Check-In Time -->
-            <a href="{{ route('attendance.index') }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm border border-emerald-200/60">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('attendance.index') }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-emerald-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs border border-emerald-200/60">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-extrabold {{ $myAttendanceToday && $myAttendanceToday->first_check_in_at ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 bg-slate-50 border border-slate-200' }} px-1.5 py-0.5 rounded-md">
+                    <span class="text-[9px] sm:text-[10px] font-extrabold {{ $myAttendanceToday && $myAttendanceToday->first_check_in_at ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 bg-slate-50 border border-slate-200' }} px-1.5 py-0.5 rounded">
                         {{ $myAttendanceToday && $myAttendanceToday->first_check_in_at ? 'Punched' : 'Pending' }}
                     </span>
                 </div>
                 <div>
-                    <span class="text-lg sm:text-xl font-extrabold text-slate-900 font-mono tracking-tight block">
+                    <span class="text-base sm:text-lg font-extrabold text-slate-900 font-mono tracking-tight block">
                         {{ $myAttendanceToday && $myAttendanceToday->first_check_in_at ? \Carbon\Carbon::parse($myAttendanceToday->first_check_in_at)->format('h:i A') : '—' }}
                     </span>
-                    <span class="text-xs text-slate-500 font-semibold block mt-0.5 group-hover:text-emerald-700 transition">Check-In Time</span>
+                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-emerald-700 transition">Check-In Time</span>
                 </div>
             </a>
 
             <!-- 2. Check-Out Time -->
-            <a href="{{ route('attendance.index') }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center font-bold text-sm border border-blue-200/60">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('attendance.index') }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-blue-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 text-[#1e3a8a] flex items-center justify-center font-bold text-xs border border-blue-200/60">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-extrabold {{ $myAttendanceToday && $myAttendanceToday->last_check_out_at ? 'text-blue-800 bg-blue-50 border border-blue-200' : ($myAttendanceToday && $myAttendanceToday->first_check_in_at ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 bg-slate-50 border border-slate-200') }} px-1.5 py-0.5 rounded-md">
+                    <span class="text-[9px] sm:text-[10px] font-extrabold {{ $myAttendanceToday && $myAttendanceToday->last_check_out_at ? 'text-blue-800 bg-blue-50 border border-blue-200' : ($myAttendanceToday && $myAttendanceToday->first_check_in_at ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 bg-slate-50 border border-slate-200') }} px-1.5 py-0.5 rounded">
                         {{ $myAttendanceToday && $myAttendanceToday->last_check_out_at ? 'Done' : ($myAttendanceToday && $myAttendanceToday->first_check_in_at ? 'On Duty' : 'Pending') }}
                     </span>
                 </div>
                 <div>
-                    <span class="text-lg sm:text-xl font-extrabold text-slate-900 font-mono tracking-tight block">
+                    <span class="text-base sm:text-lg font-extrabold text-slate-900 font-mono tracking-tight block">
                         {{ $myAttendanceToday && $myAttendanceToday->last_check_out_at ? \Carbon\Carbon::parse($myAttendanceToday->last_check_out_at)->format('h:i A') : ($myAttendanceToday && $myAttendanceToday->first_check_in_at ? 'Active' : '—') }}
                     </span>
-                    <span class="text-xs text-slate-500 font-semibold block mt-0.5 group-hover:text-blue-700 transition">Check-Out Time</span>
+                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-blue-700 transition">Check-Out Time</span>
                 </div>
             </a>
 
             <!-- 3. Worked Today -->
-            <a href="{{ route('attendance.index') }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-sm border border-teal-200/60">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('attendance.index') }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-teal-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-xs border border-teal-200/60">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-extrabold text-teal-800 bg-teal-50 px-1.5 py-0.5 rounded-md border border-teal-200 font-mono">
+                    <span class="text-[9px] sm:text-[10px] font-extrabold text-teal-800 bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200 font-mono">
                         Hours
                     </span>
                 </div>
                 <div>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
+                    <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">
                         {{ round(($myAttendanceToday->worked_minutes ?? 0) / 60, 1) }}h
                     </span>
-                    <span class="text-xs text-slate-500 font-semibold block mt-0.5 group-hover:text-teal-700 transition">Worked Today</span>
+                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-teal-700 transition">Worked Today</span>
                 </div>
             </a>
 
             <!-- 4. Pending Leaves -->
-            <a href="{{ route('leaves.index') }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-sm border border-rose-200/60">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('leaves.index') }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-rose-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs border border-rose-200/60">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <span class="text-[10px] font-extrabold text-rose-800 bg-rose-50 px-1.5 py-0.5 rounded-md border border-rose-200 font-mono">
+                    <span class="text-[9px] sm:text-[10px] font-extrabold text-rose-800 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 font-mono">
                         Review
                     </span>
                 </div>
                 <div>
-                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">
+                    <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">
                         {{ $myPendingLeavesCount ?? 0 }}
                     </span>
-                    <span class="text-xs text-slate-500 font-semibold block mt-0.5 group-hover:text-rose-700 transition">Pending Leaves</span>
+                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-rose-700 transition">Pending Leaves</span>
                 </div>
             </a>
             
@@ -319,9 +328,9 @@
 
                 <!-- 2. TODAY'S WORKFORCE ATTENDANCE TABLE -->
         <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm border border-emerald-200/60">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-sm border border-emerald-200/60 shrink-0">
                         ⏱️
                     </div>
                     <div>
@@ -329,17 +338,110 @@
                         <p class="text-xs text-slate-400">Punches logged for {{ today()->format('l, F j, Y') }}</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2.5">
+                <div class="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                     <span class="px-2.5 py-1 text-xs font-extrabold rounded-full bg-blue-50 text-[#1e3a8a] border border-blue-200 font-mono">
                         {{ $todayAttendances->count() }} Punched Today
                     </span>
-                    <a href="{{ route('attendance.index') }}" class="text-xs font-bold text-[#1e3a8a] hover:underline">
-                        View Full Logs &rarr;
+                    <a href="{{ route('attendance.index') }}" class="text-xs font-bold text-[#1e3a8a] hover:underline flex items-center gap-1">
+                        <span>View Full Logs</span>
+                        <span>&rarr;</span>
                     </a>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <!-- Mobile Attendance Cards (Visible on screens < 640px) -->
+            <div class="sm:hidden divide-y divide-slate-100">
+                @forelse($todayAttendances as $att)
+                    <div class="p-3.5 space-y-2.5 bg-white hover:bg-slate-50/50 transition">
+                        <!-- Top: Avatar, Name, Employee Code & Status Badge -->
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-full bg-blue-50 text-[#1e3a8a] font-extrabold flex items-center justify-center text-xs shrink-0 border border-blue-200">
+                                    {{ strtoupper(substr($att->employee->first_name ?? 'E', 0, 1)) }}
+                                </div>
+                                <div>
+                                    <span class="font-extrabold text-slate-900 text-xs block leading-tight">{{ $att->employee->full_name ?? 'Employee' }}</span>
+                                    <span class="text-[10px] font-mono text-slate-400 block mt-0.5">
+                                        {{ $att->employee->employee_code ?? '' }} • {{ $att->employee->department->name ?? '—' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                @if($att->status === 'PRESENT')
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 whitespace-nowrap">
+                                        ● PRESENT
+                                    </span>
+                                @elseif($att->status === 'LATE')
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200 whitespace-nowrap">
+                                        ● LATE ({{ $att->late_minutes }}m)
+                                    </span>
+                                @elseif($att->status === 'HALF_DAY')
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-800 border border-blue-200 whitespace-nowrap">
+                                        ● HALF DAY
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200 whitespace-nowrap">
+                                        {{ $att->status }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Middle: Punch Metrics Strip -->
+                        <div class="grid grid-cols-3 gap-2 bg-slate-50/80 p-2 rounded-lg border border-slate-100 text-center">
+                            <div>
+                                <span class="block text-[9px] uppercase font-bold text-slate-400">Check-In</span>
+                                <span class="font-mono font-bold text-xs text-slate-900">
+                                    {{ $att->first_check_in_at ? \Carbon\Carbon::parse($att->first_check_in_at)->format('h:i A') : '—' }}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="block text-[9px] uppercase font-bold text-slate-400">Check-Out</span>
+                                <span class="font-mono text-xs {{ $att->last_check_out_at ? 'font-bold text-slate-900' : 'text-emerald-700 font-semibold' }}">
+                                    {{ $att->last_check_out_at ? \Carbon\Carbon::parse($att->last_check_out_at)->format('h:i A') : ($att->first_check_in_at ? 'Active Duty' : '—') }}
+                                </span>
+                            </div>
+                            <div>
+                                <span class="block text-[9px] uppercase font-bold text-slate-400">Worked</span>
+                                <span class="font-mono font-bold text-xs text-[#1e3a8a]">
+                                    {{ round(($att->worked_minutes ?? 0) / 60, 1) }}h
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Bottom: Action buttons -->
+                        <div class="flex items-center justify-end gap-2 pt-0.5">
+                            <a 
+                                href="{{ $att->maps_url }}" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#1e3a8a] text-[11px] font-bold border border-blue-200 transition"
+                            >
+                                <svg class="w-3 h-3 text-[#1e3a8a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span>GPS Map</span>
+                            </a>
+                            <button 
+                                type="button" 
+                                onclick="openDashboardEditModal({{ $att->id }}, '{{ addslashes($att->employee->full_name ?? '') }}', '{{ $att->first_check_in_at ? \Carbon\Carbon::parse($att->first_check_in_at)->format('H:i') : '' }}', '{{ $att->last_check_out_at ? \Carbon\Carbon::parse($att->last_check_out_at)->format('H:i') : '' }}', '{{ $att->status }}', '{{ addslashes($att->admin_remarks ?? '') }}')"
+                                class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#1e3a8a] font-bold border border-blue-200 text-[11px] cursor-pointer transition"
+                            >
+                                Edit Punch ✎
+                            </button>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-6 text-center text-slate-400 text-xs">
+                        <span class="font-bold text-slate-700 block">No attendance punches recorded yet today</span>
+                        <span class="text-slate-400 text-[11px]">Records will appear here as employees punch in</span>
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Desktop Attendance Table (Hidden on screens < 640px) -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50/90 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider">
                         <tr>
@@ -438,9 +540,9 @@
         </div>
         <!-- 1. EMPLOYEES ON LEAVE TODAY TABLE -->
         <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm border border-amber-200/60">
+                    <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-sm border border-amber-200/60 shrink-0">
                         🌴
                     </div>
                     <div>
@@ -448,17 +550,61 @@
                         <p class="text-xs text-slate-400">Approved leave requests active for {{ today()->format('l, F j, Y') }}</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2.5">
+                <div class="flex items-center justify-between sm:justify-end gap-2.5 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                     <span class="px-2.5 py-1 text-xs font-extrabold rounded-full {{ $onLeaveTodayCount > 0 ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-600' }} font-mono">
                         {{ $onLeaveTodayCount }} On Leave Today
                     </span>
-                    <a href="{{ route('leaves.index') }}" class="text-xs font-bold text-[#1e3a8a] hover:underline">
-                        Manage Leaves &rarr;
+                    <a href="{{ route('leaves.index') }}" class="text-xs font-bold text-[#1e3a8a] hover:underline flex items-center gap-1">
+                        <span>Manage Leaves</span>
+                        <span>&rarr;</span>
                     </a>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <!-- Mobile Leaves Cards (Visible on screens < 640px) -->
+            <div class="sm:hidden divide-y divide-slate-100">
+                @forelse($employeesOnLeaveToday as $leave)
+                    <div class="p-3.5 space-y-2 bg-white">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-700 font-extrabold flex items-center justify-center text-xs shrink-0 border border-amber-200">
+                                    {{ strtoupper(substr($leave->employee->first_name ?? 'E', 0, 1)) }}
+                                </div>
+                                <div>
+                                    <span class="font-extrabold text-slate-900 text-xs block leading-tight">{{ $leave->employee->full_name ?? 'Employee' }}</span>
+                                    <span class="text-[10px] font-mono text-slate-400 block mt-0.5">
+                                        {{ $leave->employee->employee_code ?? '' }} • {{ $leave->employee->department->name ?? '—' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200 whitespace-nowrap">
+                                ● APPROVED
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs pt-1">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-[#1e3a8a] text-[11px] font-bold border border-blue-200">
+                                {{ $leave->leaveType->name ?? 'Leave' }}
+                            </span>
+                            <span class="font-mono text-[11px] text-slate-700 font-bold">
+                                {{ \Carbon\Carbon::parse($leave->start_date)->format('M d') }} - {{ \Carbon\Carbon::parse($leave->end_date)->format('M d') }} ({{ $leave->total_days }}d)
+                            </span>
+                        </div>
+                        @if($leave->reason)
+                            <p class="text-[11px] text-slate-500 italic bg-slate-50 p-2 rounded border border-slate-100">
+                                "{{ $leave->reason }}"
+                            </p>
+                        @endif
+                    </div>
+                @empty
+                    <div class="p-6 text-center text-slate-400 text-xs">
+                        <span class="font-bold text-slate-700 block">No employees on leave today</span>
+                        <span class="text-slate-400 text-[11px]">All active personnel are scheduled on duty</span>
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Desktop Leaves Table (Hidden on screens < 640px) -->
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50/90 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider">
                         <tr>

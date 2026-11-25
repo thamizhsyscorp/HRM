@@ -1,0 +1,11 @@
+name,holiday_date,type,is_optional,description
+New Year's Day,2026-01-01,PUBLIC,0,Global celebration of the New Year
+Pongal / Makar Sankranti,2026-01-14,FESTIVAL,0,Harvest festival celebrated across Tamil Nadu & Puducherry
+Republic Day,2026-01-26,PUBLIC,0,National celebration of the Constitution of India
+Maha Shivratri,2026-02-15,OPTIONAL,1,Optional religious observance
+May Day / Labor Day,2026-05-01,PUBLIC,0,International Workers' Day
+Independence Day,2026-08-15,PUBLIC,0,National Independence Day of India
+Gandhi Jayanti,2026-10-02,PUBLIC,0,Mahatma Gandhi birth anniversary
+Deepavali / Diwali,2026-11-08,FESTIVAL,0,Festival of Lights
+Company Anniversary,2026-11-25,COMPANY,0,Syscorp Annual Foundation Day
+Christmas Day,2026-12-25,PUBLIC,0,Christmas public holiday

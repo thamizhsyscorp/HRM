@@ -64,6 +64,8 @@ Route::middleware('auth')->group(function () {
 
     // Corporate Holidays & Calendar Schedule Management (Super Admin & HR)
     Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');
+    Route::get('/holidays/sample', [HolidayController::class, 'sample'])->name('holidays.sample');
+    Route::post('/holidays/import', [HolidayController::class, 'import'])->name('holidays.import');
     Route::post('/holidays', [HolidayController::class, 'store'])->name('holidays.store');
     Route::put('/holidays/{holiday}', [HolidayController::class, 'update'])->name('holidays.update');
     Route::delete('/holidays/{holiday}', [HolidayController::class, 'destroy'])->name('holidays.destroy');
