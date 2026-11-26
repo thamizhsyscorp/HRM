@@ -123,7 +123,7 @@
                 <!-- Department -->
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Department <span class="text-rose-500">*</span></label>
-                    <select name="department_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] bg-white text-slate-900">
+                    <select name="department_id" id="departmentSelect" onchange="filterDesignationsByDepartment()" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] bg-white text-slate-900">
                         <option value="">Select Department</option>
                         @foreach($departments as $dept)
                             <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>
@@ -136,12 +136,14 @@
                 <!-- Designation -->
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Designation Title <span class="text-rose-500">*</span></label>
-                    <select name="designation_id" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] bg-white text-slate-900">
-                        <option value="">Select Designation</option>
+                    <select name="designation_id" id="designationSelect" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] bg-white text-slate-900">
+                        <option value="">{{ old('department_id') ? 'Select Designation' : '— First Select a Department —' }}</option>
                         @foreach($designations as $desig)
-                            <option value="{{ $desig->id }}" {{ old('designation_id') == $desig->id ? 'selected' : '' }}>
-                                {{ $desig->name }}
-                            </option>
+                            @if(!old('department_id') || old('department_id') == $desig->department_id)
+                                <option value="{{ $desig->id }}" data-department-id="{{ $desig->department_id }}" {{ old('designation_id') == $desig->id ? 'selected' : '' }}>
+                                    {{ $desig->name }}
+                                </option>
+                            @endif
                         @endforeach
                     </select>
                 </div>
@@ -212,19 +214,32 @@
 
         <!-- SECTION 3: Salary Components & Compensation (INR) -->
         <div class="bg-white rounded-2xl border border-slate-100 p-6 sm:p-7 shadow-md">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between border-b border-slate-100 pb-5 mb-6 gap-4">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-xl bg-[#eff6ff] text-[#1e3a8a] font-extrabold flex items-center justify-center text-xs border border-[#bfdbfe]">
                         3
                     </div>
                     <div>
                         <h3 class="text-sm font-extrabold text-slate-900">Monthly Compensation & Statutory Structure</h3>
-                        <p class="text-xs text-slate-400">Configures employee initial salary breakdown components (INR)</p>
+                        <p class="text-xs text-slate-400">Configure allowances, percentage-based statutory deductions & live take-home pay</p>
                     </div>
                 </div>
-                <div class="text-right">
-                    <span class="text-xs text-slate-400 font-medium">Estimated Monthly Gross</span>
-                    <p id="previewMonthlyGross" class="text-xl font-extrabold text-[#1e3a8a] font-mono">₹57,000</p>
+                <!-- Real-time Compensation Strip -->
+                <div class="flex flex-wrap items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                    <div class="px-2">
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Gross Earnings</span>
+                        <p id="previewMonthlyGross" class="text-sm font-extrabold text-slate-800 font-mono">₹57,000</p>
+                    </div>
+                    <div class="h-7 w-px bg-slate-200"></div>
+                    <div class="px-2">
+                        <span class="text-[10px] text-rose-500 font-bold uppercase tracking-wider block">Total Deductions</span>
+                        <p id="previewTotalDeductions" class="text-sm font-extrabold text-rose-600 font-mono">-₹4,400</p>
+                    </div>
+                    <div class="h-7 w-px bg-slate-200"></div>
+                    <div class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg shadow-sm">
+                        <span class="text-[10px] text-emerald-100 font-extrabold uppercase tracking-wider block">Monthly Take-Home</span>
+                        <p id="previewMonthlyTakeHome" class="text-base font-black font-mono">₹52,600</p>
+                    </div>
                 </div>
             </div>
 
@@ -236,6 +251,7 @@
                         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-sm">₹</span>
                         <input type="number" id="inpBasic" name="basic_salary" value="{{ old('basic_salary', 35000) }}" oninput="updateSalaryPreview()" required min="0" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] font-mono font-semibold text-slate-900">
                     </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Primary base for statutory % deductions</p>
                 </div>
 
                 <!-- HRA -->
@@ -265,22 +281,42 @@
                     </div>
                 </div>
 
-                <!-- Provident Fund -->
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Provident Fund (PF Deduction)</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-sm">₹</span>
-                        <input type="number" id="inpPf" name="provident_fund" value="{{ old('provident_fund', 1800) }}" min="0" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] font-mono font-semibold text-slate-900">
+                <!-- Provident Fund (Percentage) -->
+                <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-200/80">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">PF Deduction (%)</label>
+                        <span id="previewPfAmount" class="text-xs font-bold text-amber-800 font-mono">₹4,200/mo</span>
                     </div>
+                    <div class="relative">
+                        <input type="number" id="inpPfPercent" name="provident_fund_percentage" value="{{ old('provident_fund_percentage', 12) }}" oninput="updateSalaryPreview()" step="0.1" min="0" max="100" class="w-full pl-3.5 pr-8 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] font-mono font-semibold text-slate-900 bg-white">
+                        <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 font-extrabold text-sm pointer-events-none">%</span>
+                    </div>
+                    <input type="hidden" id="inpPf" name="provident_fund" value="{{ old('provident_fund', 4200) }}">
+                    <p class="text-[11px] text-slate-500 mt-1">Calculated on Basic (EPFO standard 12%)</p>
                 </div>
 
-                <!-- Professional Tax -->
+                <!-- Other Deductions (Percentage - TDS / Insurance) -->
+                <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-200/80">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Other Deductions (%)</label>
+                        <span id="previewOtherDeductionAmount" class="text-xs font-bold text-rose-800 font-mono">₹0/mo</span>
+                    </div>
+                    <div class="relative">
+                        <input type="number" id="inpOtherDeductionPercent" name="other_deductions_percentage" value="{{ old('other_deductions_percentage', 0) }}" oninput="updateSalaryPreview()" step="0.1" min="0" max="100" class="w-full pl-3.5 pr-8 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] font-mono font-semibold text-slate-900 bg-white">
+                        <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 font-extrabold text-sm pointer-events-none">%</span>
+                    </div>
+                    <input type="hidden" id="inpOtherDeduction" name="other_deductions" value="{{ old('other_deductions', 0) }}">
+                    <p class="text-[11px] text-slate-500 mt-1">Calculated on Basic (e.g. TDS / ESI / Voluntary)</p>
+                </div>
+
+                <!-- Professional Tax (Fixed Amount) -->
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Professional Tax (PT)</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-sm">₹</span>
-                        <input type="number" id="inpPt" name="professional_tax" value="{{ old('professional_tax', 200) }}" min="0" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] font-mono font-semibold text-slate-900">
+                        <input type="number" id="inpPt" name="professional_tax" value="{{ old('professional_tax', 200) }}" oninput="updateSalaryPreview()" min="0" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] font-mono font-semibold text-slate-900">
                     </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Standard statutory flat tax slab</p>
                 </div>
             </div>
         </div>
@@ -376,13 +412,99 @@
 
 @section('scripts')
 <script>
+    const allDesignations = {!! json_encode($designations->map(fn($d) => [
+        'id' => $d->id,
+        'department_id' => $d->department_id,
+        'name' => $d->name,
+    ])) !!};
+
+    function filterDesignationsByDepartment(selectedDesigId = null) {
+        const deptSelect = document.getElementById('departmentSelect');
+        const desigSelect = document.getElementById('designationSelect');
+        if (!deptSelect || !desigSelect) return;
+
+        const selectedDeptId = deptSelect.value;
+        const currentVal = selectedDesigId !== null && selectedDesigId !== '' ? selectedDesigId : desigSelect.value;
+
+        desigSelect.innerHTML = '';
+
+        if (!selectedDeptId) {
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = '— First Select a Department —';
+            desigSelect.appendChild(defaultOpt);
+            desigSelect.disabled = true;
+            return;
+        }
+
+        desigSelect.disabled = false;
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = 'Select Designation';
+        desigSelect.appendChild(defaultOpt);
+
+        const matching = allDesignations.filter(d => String(d.department_id) === String(selectedDeptId));
+
+        if (matching.length === 0) {
+            defaultOpt.textContent = 'No designations configured for this department';
+            return;
+        }
+
+        let isCurrentValPreserved = false;
+        matching.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.id;
+            opt.textContent = d.name;
+            if (String(currentVal) === String(d.id)) {
+                opt.selected = true;
+                isCurrentValPreserved = true;
+            }
+            desigSelect.appendChild(opt);
+        });
+
+        if (!isCurrentValPreserved && selectedDesigId === null) {
+            desigSelect.value = '';
+        }
+    }
+
     function updateSalaryPreview() {
-        const basic = parseFloat(document.getElementById('inpBasic').value) || 0;
-        const hra = parseFloat(document.getElementById('inpHra').value) || 0;
-        const conveyance = parseFloat(document.getElementById('inpConveyance').value) || 0;
-        const special = parseFloat(document.getElementById('inpSpecial').value) || 0;
-        const total = basic + hra + conveyance + special;
-        document.getElementById('previewMonthlyGross').textContent = '₹' + total.toLocaleString('en-IN');
+        const basic = parseFloat(document.getElementById('inpBasic')?.value) || 0;
+        const hra = parseFloat(document.getElementById('inpHra')?.value) || 0;
+        const conveyance = parseFloat(document.getElementById('inpConveyance')?.value) || 0;
+        const special = parseFloat(document.getElementById('inpSpecial')?.value) || 0;
+        const gross = basic + hra + conveyance + special;
+
+        // PF percentage calculation on Basic Salary
+        const pfPercent = parseFloat(document.getElementById('inpPfPercent')?.value) || 0;
+        const pfAmount = Math.round((basic * (pfPercent / 100)) * 100) / 100;
+        const hiddenPf = document.getElementById('inpPf');
+        if (hiddenPf) hiddenPf.value = pfAmount;
+        const previewPf = document.getElementById('previewPfAmount');
+        if (previewPf) previewPf.textContent = '₹' + pfAmount.toLocaleString('en-IN') + '/mo (' + pfPercent + '%)';
+
+        // Other Deductions percentage calculation on Basic Salary
+        const otherPercent = parseFloat(document.getElementById('inpOtherDeductionPercent')?.value) || 0;
+        const otherAmount = Math.round((basic * (otherPercent / 100)) * 100) / 100;
+        const hiddenOther = document.getElementById('inpOtherDeduction');
+        if (hiddenOther) hiddenOther.value = otherAmount;
+        const previewOther = document.getElementById('previewOtherDeductionAmount');
+        if (previewOther) previewOther.textContent = '₹' + otherAmount.toLocaleString('en-IN') + '/mo (' + otherPercent + '%)';
+
+        // Professional Tax
+        const pt = parseFloat(document.getElementById('inpPt')?.value) || 0;
+
+        // Total deductions & Take Home
+        const totalDeductions = pfAmount + otherAmount + pt;
+        const takeHome = Math.max(0, gross - totalDeductions);
+
+        const elGross = document.getElementById('previewMonthlyGross');
+        if (elGross) elGross.textContent = '₹' + gross.toLocaleString('en-IN');
+
+        const elDeductions = document.getElementById('previewTotalDeductions');
+        if (elDeductions) elDeductions.textContent = '-₹' + totalDeductions.toLocaleString('en-IN');
+
+        const elTakeHome = document.getElementById('previewMonthlyTakeHome');
+        if (elTakeHome) elTakeHome.textContent = '₹' + takeHome.toLocaleString('en-IN');
     }
 
     function toggleManagerOptions() {
@@ -396,6 +518,11 @@
             }
         }
     }
-    document.addEventListener('DOMContentLoaded', toggleManagerOptions);
+
+    document.addEventListener('DOMContentLoaded', function() {
+        filterDesignationsByDepartment('{{ old('designation_id') }}');
+        toggleManagerOptions();
+        updateSalaryPreview();
+    });
 </script>
 @endsection

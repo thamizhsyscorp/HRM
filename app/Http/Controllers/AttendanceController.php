@@ -161,6 +161,11 @@ class AttendanceController extends Controller
     public function checkIn(Request $request): RedirectResponse
     {
         $user = Auth::user();
+
+        if ($user->hasRole('super-admin')) {
+            return back()->with('status', 'Super Admin accounts are exempt from attendance check-in.');
+        }
+
         $employee = $user->employee;
 
         if (!$employee) {
@@ -239,6 +244,11 @@ class AttendanceController extends Controller
     public function checkOut(Request $request): RedirectResponse
     {
         $user = Auth::user();
+
+        if ($user->hasRole('super-admin')) {
+            return back()->with('status', 'Super Admin accounts are exempt from attendance check-out.');
+        }
+
         $employee = $user->employee;
 
         if (!$employee) {
@@ -390,12 +400,16 @@ class AttendanceController extends Controller
 
         $activeEmployees = collect();
         if ($isSuperAdmin || $isHr) {
-            $activeEmployees = Employee::with('department')->where('employment_status', 'ACTIVE')->orderBy('first_name')->get();
+            $activeEmployees = Employee::with('department')
+                ->where('employment_status', 'ACTIVE')
+                ->whereDoesntHave('user.roles', fn($q) => $q->where('slug', 'super-admin'))
+                ->orderBy('first_name')
+                ->get();
             $targetEmployeeId = $request->input('employee_id');
             if ($targetEmployeeId) {
                 $targetEmployee = Employee::find($targetEmployeeId);
             } else {
-                $targetEmployee = $user->employee ?: $activeEmployees->first();
+                $targetEmployee = ($user->hasRole('super-admin') ? $activeEmployees->first() : $user->employee) ?: $activeEmployees->first() ?: $user->employee;
             }
         } else {
             $targetEmployee = $user->employee;
@@ -495,6 +509,11 @@ class AttendanceController extends Controller
                     'status' => $att->status,
                     'is_manual' => $att->is_manual,
                 ];
+            } elseif ($targetEmployee?->user?->hasRole('super-admin')) {
+                $dayStatus = 'EXEMPT';
+                $color = 'blue';
+                $label = 'Exempt (Super Admin)';
+                $leaveReason = 'Super Admin accounts are exempt from daily attendance punches.';
             } elseif ($currentDate->lte($today)) {
                 $dayStatus = 'ABSENT';
                 $color = 'red';

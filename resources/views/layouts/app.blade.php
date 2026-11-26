@@ -183,7 +183,7 @@
                                     <svg class="w-4 h-4 {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
-                                    <span class="text-[13px]">Payroll & Salary</span>
+                                    <span class="text-[13px]">{{ auth()->user()->hasRole('super-admin') ? 'Company Payroll' : (auth()->user()->hasRole('hr-manager') ? 'Workforce Payroll' : 'My Salary & Take-Home') }}</span>
                                 </div>
                                 <span class="text-[9px] font-mono font-extrabold bg-blue-100 text-blue-900 px-1.5 py-0.5 rounded-md">Live</span>
                             </a>
@@ -322,27 +322,65 @@
                                         <span>Change Password</span>
                                     </button>
 
-                                    <!-- My Salary & Take-Home -->
-                                    <a 
-                                        href="{{ route('payroll.index') }}" 
-                                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
-                                    >
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                        </svg>
-                                        <span>My Salary & Take-Home</span>
-                                    </a>
+                                    @if(auth()->user()->hasRole('super-admin'))
+                                        <!-- Company Owner / Super Admin Items -->
+                                        <!-- Company Payroll Ledger -->
+                                        <a 
+                                            href="{{ route('payroll.index') }}" 
+                                            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
+                                        >
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                            </svg>
+                                            <span>Company Payroll Ledger</span>
+                                        </a>
 
-                                    <!-- Calendar & Holidays -->
-                                    <a 
-                                        href="{{ route('attendance.calendar') }}" 
-                                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
-                                    >
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                        <span>Calendar & Holidays</span>
-                                    </a>
+                                        <!-- Company Settings -->
+                                        <a 
+                                            href="{{ route('settings.index') }}" 
+                                            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
+                                        >
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            </svg>
+                                            <span>Company Settings</span>
+                                        </a>
+
+                                        <!-- Calendar & Holidays -->
+                                        <a 
+                                            href="{{ route('attendance.calendar') }}" 
+                                            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
+                                        >
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            <span>Calendar & Holidays</span>
+                                        </a>
+                                    @else
+                                        <!-- Employee Items -->
+                                        <!-- My Salary & Take-Home -->
+                                        <a 
+                                            href="{{ route('payroll.index') }}" 
+                                            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
+                                        >
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                            </svg>
+                                            <span>My Salary & Take-Home</span>
+                                        </a>
+
+                                        <!-- Calendar & Holidays -->
+                                        <a 
+                                            href="{{ route('attendance.calendar') }}" 
+                                            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
+                                        >
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            <span>Calendar & Holidays</span>
+                                        </a>
+                                    @endif
                                 </div>
 
                                 <div class="p-1.5 border-t border-slate-100">
@@ -411,62 +449,122 @@
 
         <!-- MOBILE BOTTOM NAVIGATION BAR (md:hidden) -->
         <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-1 shadow-lg flex items-center justify-around select-none">
-            <!-- 1. Home / Dashboard -->
-            <a 
-                href="{{ route('dashboard') }}" 
-                class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('dashboard') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
-            >
-                <svg class="w-5 h-5 {{ request()->routeIs('dashboard') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
-                <span class="text-[10px] mt-0.5 tracking-tight">Home</span>
-            </a>
+            @if(auth()->check() && auth()->user()->hasRole('super-admin'))
+                <!-- Super Admin Mobile Navigation (Exempt from Attendance Check-In) -->
+                <!-- 1. Dashboard -->
+                <a 
+                    href="{{ route('dashboard') }}" 
+                    class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('dashboard') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+                >
+                    <svg class="w-5 h-5 {{ request()->routeIs('dashboard') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 tracking-tight">Home</span>
+                </a>
 
-            <!-- 2. Calendar -->
-            <a 
-                href="{{ route('attendance.calendar') }}" 
-                class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('attendance.calendar') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
-            >
-                <svg class="w-5 h-5 {{ request()->routeIs('attendance.calendar') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <span class="text-[10px] mt-0.5 tracking-tight">Calendar</span>
-            </a>
+                <!-- 2. Attendance Roster -->
+                <a 
+                    href="{{ route('attendance.index') }}" 
+                    class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('attendance.*') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+                >
+                    <svg class="w-5 h-5 {{ request()->routeIs('attendance.*') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 tracking-tight">Attendance</span>
+                </a>
 
-            <!-- 3. Prominent Quick Scan QR Button -->
-            <button 
-                type="button" 
-                onclick="openQrScanner()" 
-                class="-mt-5 w-12 h-12 rounded-full bg-[#1e3a8a] hover:bg-[#1e40af] text-white flex items-center justify-center shadow-lg border-2 border-white ring-4 ring-blue-100 active:scale-95 transition cursor-pointer"
-                title="Scan QR Attendance"
-            >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                </svg>
-            </button>
+                <!-- 3. Staff Directory -->
+                <a 
+                    href="{{ route('employees.index') }}" 
+                    class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('employees.*') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+                >
+                    <svg class="w-5 h-5 {{ request()->routeIs('employees.*') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 tracking-tight">Staff</span>
+                </a>
 
-            <!-- 4. Payroll / Salary -->
-            <a 
-                href="{{ route('payroll.index') }}" 
-                class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
-            >
-                <svg class="w-5 h-5 {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-                <span class="text-[10px] mt-0.5 tracking-tight">Salary</span>
-            </a>
+                <!-- 4. Payroll Ledger -->
+                <a 
+                    href="{{ route('payroll.index') }}" 
+                    class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+                >
+                    <svg class="w-5 h-5 {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 tracking-tight">Payroll</span>
+                </a>
 
-            <!-- 5. Drawer Menu / More -->
-            <button 
-                type="button" 
-                onclick="toggleMobileSidebar()" 
-                class="flex flex-col items-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-slate-700 transition cursor-pointer"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-                <span class="text-[10px] mt-0.5 tracking-tight">Menu</span>
-            </button>
+                <!-- 5. Drawer Menu / More -->
+                <button 
+                    type="button" 
+                    onclick="toggleMobileSidebar()" 
+                    class="flex flex-col items-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 tracking-tight">Menu</span>
+                </button>
+            @else
+                <!-- Workforce & Employee Mobile Navigation (With Quick Scan QR) -->
+                <!-- 1. Home / Dashboard -->
+                <a 
+                    href="{{ route('dashboard') }}" 
+                    class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('dashboard') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+                >
+                    <svg class="w-5 h-5 {{ request()->routeIs('dashboard') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 tracking-tight">Home</span>
+                </a>
+
+                <!-- 2. Calendar -->
+                <a 
+                    href="{{ route('attendance.calendar') }}" 
+                    class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('attendance.calendar') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+                >
+                    <svg class="w-5 h-5 {{ request()->routeIs('attendance.calendar') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 tracking-tight">Calendar</span>
+                </a>
+
+                <!-- 3. Prominent Quick Scan QR Button -->
+                <button 
+                    type="button" 
+                    onclick="openQrScanner()" 
+                    class="-mt-5 w-12 h-12 rounded-full bg-[#1e3a8a] hover:bg-[#1e40af] text-white flex items-center justify-center shadow-lg border-2 border-white ring-4 ring-blue-100 active:scale-95 transition cursor-pointer"
+                    title="Scan QR Attendance"
+                >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                </button>
+
+                <!-- 4. Payroll / Salary -->
+                <a 
+                    href="{{ route('payroll.index') }}" 
+                    class="flex flex-col items-center py-1 px-2.5 rounded-xl transition {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a] font-extrabold' : 'text-slate-400 hover:text-slate-700 font-medium' }}"
+                >
+                    <svg class="w-5 h-5 {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 tracking-tight">Salary</span>
+                </a>
+
+                <!-- 5. Drawer Menu / More -->
+                <button 
+                    type="button" 
+                    onclick="toggleMobileSidebar()" 
+                    class="flex flex-col items-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <span class="text-[10px] mt-0.5 tracking-tight">Menu</span>
+                </button>
+            @endif
         </nav>
     </div>
 

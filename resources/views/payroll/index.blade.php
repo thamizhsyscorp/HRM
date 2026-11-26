@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Payroll & Salary')
-@section('page_title', 'Payroll & Take-Home Salary')
+@section('title', $isSuperAdmin ? 'Company Payroll & Disbursals' : ($isHr ? 'Workforce Payroll' : 'My Salary & Take-Home'))
+@section('page_title', $isSuperAdmin ? 'Company Payroll & Workforce Disbursals' : ($isHr ? 'Workforce Payroll Ledger' : 'Salary & Take-Home Overview'))
 
 @section('content')
 <div class="space-y-6 max-w-7xl mx-auto">

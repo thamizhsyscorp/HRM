@@ -32,8 +32,9 @@ class DashboardController extends Controller
         $isDeptManager = $user->hasRole('manager') || $user->hasRole('department-manager') || $user->hasRole('pm');
         $isEmployee = $user->hasRole('employee');
 
-        // General Counts
-        $totalEmployees = Employee::count();
+        // General Counts (Workforce staff requiring attendance, excluding Super Admin)
+        $staffCount = Employee::whereDoesntHave('user.roles', fn($q) => $q->where('slug', 'super-admin'))->count();
+        $totalEmployees = $staffCount > 0 ? $staffCount : Employee::count();
         $today = Carbon::today();
         $daysInMonth = $today->daysInMonth;
         $elapsedDays = $today->day;

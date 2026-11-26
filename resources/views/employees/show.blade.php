@@ -120,11 +120,27 @@
                         <h3 class="text-sm font-extrabold text-slate-900">Compensation Structure & Salary Breakdown</h3>
                         <p class="text-xs text-slate-400">Configures monthly earnings and statutory deductions</p>
                     </div>
-                    <div class="text-right">
-                        <span class="text-[11px] text-slate-400 block font-medium">Total Monthly Earnings</span>
-                        <span class="text-lg font-extrabold text-[#1e3a8a] font-mono">
-                            ₹{{ number_format($employee->salaryComponents->where('salaryComponent.category', 'EARNING')->sum('amount'), 2) }}
-                        </span>
+                    <div class="flex items-center gap-3 text-right">
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">Total Monthly Earnings</span>
+                            <span class="text-sm font-extrabold text-[#1e3a8a] font-mono">
+                                ₹{{ number_format($employee->salaryComponents->where('salaryComponent.category', 'EARNING')->sum('amount'), 2) }}
+                            </span>
+                        </div>
+                        <div class="h-6 w-px bg-slate-200"></div>
+                        <div>
+                            <span class="text-[10px] text-rose-500 block font-medium">Total Deductions</span>
+                            <span class="text-sm font-extrabold text-rose-600 font-mono">
+                                -₹{{ number_format($employee->salaryComponents->where('salaryComponent.category', 'DEDUCTION')->sum('amount'), 2) }}
+                            </span>
+                        </div>
+                        <div class="h-6 w-px bg-slate-200"></div>
+                        <div class="bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                            <span class="text-[9px] text-emerald-700 block font-bold uppercase tracking-wider">Take-Home</span>
+                            <span class="text-sm font-black text-emerald-700 font-mono">
+                                ₹{{ number_format(max(0, $employee->salaryComponents->where('salaryComponent.category', 'EARNING')->sum('amount') - $employee->salaryComponents->where('salaryComponent.category', 'DEDUCTION')->sum('amount')), 2) }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 

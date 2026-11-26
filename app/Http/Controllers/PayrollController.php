@@ -73,9 +73,10 @@ class PayrollController extends Controller
         // Periods & Runs
         $payrollPeriods = PayrollPeriod::latest('start_date')->take(6)->get();
 
-        // Real-time Employee Take-Home Ledger for all active employees
+        // Real-time Employee Take-Home Ledger for all active workforce employees (excluding super-admin / company owner)
         $allEmployees = Employee::with(['department', 'designation', 'salaryComponents.salaryComponent', 'bankAccounts'])
             ->where('employment_status', 'ACTIVE')
+            ->whereDoesntHave('user.roles', fn($q) => $q->where('slug', 'super-admin'))
             ->orderBy('first_name')
             ->get();
 
@@ -145,13 +146,13 @@ class PayrollController extends Controller
             ];
         });
 
-        // Personal Take-Home details for logged in user (if employee)
+        // Personal Take-Home details for logged in staff employee (not applicable for Super Admin / Owner)
         $mySalaryComponents = collect();
         $myTakeHomeData = null;
         $myDeductionsList = collect();
         $myBasic = 0;
 
-        if ($user->employee) {
+        if ($user->employee && !$isSuperAdmin) {
             $mySalaryComponents = EmployeeSalaryComponent::with('salaryComponent')
                 ->where('employee_id', $user->employee->id)
                 ->get();

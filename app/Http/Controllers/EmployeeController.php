@@ -176,6 +176,9 @@ class EmployeeController extends Controller
             'conveyance' => ['nullable', 'numeric', 'min:0'],
             'special_allowance' => ['nullable', 'numeric', 'min:0'],
             'provident_fund' => ['nullable', 'numeric', 'min:0'],
+            'provident_fund_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'other_deductions' => ['nullable', 'numeric', 'min:0'],
+            'other_deductions_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'professional_tax' => ['nullable', 'numeric', 'min:0'],
 
             // Bank Account
@@ -236,13 +239,30 @@ class EmployeeController extends Controller
                 ['description' => 'Corporate salary structure for full-time employees', 'is_active' => true]
             );
 
+            $basicSalary = (float) $request->input('basic_salary', 35000);
+
+            // Calculate PF: percentage of basic salary if provided, else direct amount
+            if ($request->filled('provident_fund_percentage')) {
+                $pfAmount = round($basicSalary * ((float) $request->input('provident_fund_percentage') / 100), 2);
+            } else {
+                $pfAmount = (float) $request->input('provident_fund', 1800);
+            }
+
+            // Calculate Other Deductions (TDS): percentage of basic salary if provided, else direct amount
+            if ($request->filled('other_deductions_percentage')) {
+                $otherDeductionsAmount = round($basicSalary * ((float) $request->input('other_deductions_percentage') / 100), 2);
+            } else {
+                $otherDeductionsAmount = (float) $request->input('other_deductions', $request->input('tds', 0));
+            }
+
             $salaryInputs = [
-                'BASIC' => $request->input('basic_salary', 35000),
-                'HRA' => $request->input('hra', 14000),
-                'CONVEYANCE' => $request->input('conveyance', 2000),
-                'SPECIAL' => $request->input('special_allowance', 6000),
-                'PF' => $request->input('provident_fund', 1800),
-                'PT' => $request->input('professional_tax', 200),
+                'BASIC' => $basicSalary,
+                'HRA' => (float) $request->input('hra', 14000),
+                'CONVEYANCE' => (float) $request->input('conveyance', 2000),
+                'SPECIAL' => (float) $request->input('special_allowance', 6000),
+                'PF' => $pfAmount,
+                'PT' => (float) $request->input('professional_tax', 200),
+                'TDS' => $otherDeductionsAmount,
             ];
 
             foreach ($salaryInputs as $code => $amt) {
@@ -402,6 +422,9 @@ class EmployeeController extends Controller
             'conveyance' => ['nullable', 'numeric', 'min:0'],
             'special_allowance' => ['nullable', 'numeric', 'min:0'],
             'provident_fund' => ['nullable', 'numeric', 'min:0'],
+            'provident_fund_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'other_deductions' => ['nullable', 'numeric', 'min:0'],
+            'other_deductions_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'professional_tax' => ['nullable', 'numeric', 'min:0'],
 
             // Bank Account
@@ -465,13 +488,30 @@ class EmployeeController extends Controller
                 ['description' => 'Corporate salary structure for full-time employees', 'is_active' => true]
             );
 
+            $basicSalary = (float) $request->input('basic_salary', 0);
+
+            // Calculate PF: percentage of basic salary if provided, else direct amount
+            if ($request->filled('provident_fund_percentage')) {
+                $pfAmount = round($basicSalary * ((float) $request->input('provident_fund_percentage') / 100), 2);
+            } else {
+                $pfAmount = (float) $request->input('provident_fund', 0);
+            }
+
+            // Calculate Other Deductions (TDS): percentage of basic salary if provided, else direct amount
+            if ($request->filled('other_deductions_percentage')) {
+                $otherDeductionsAmount = round($basicSalary * ((float) $request->input('other_deductions_percentage') / 100), 2);
+            } else {
+                $otherDeductionsAmount = (float) $request->input('other_deductions', $request->input('tds', 0));
+            }
+
             $salaryInputs = [
-                'BASIC' => $request->input('basic_salary', 0),
-                'HRA' => $request->input('hra', 0),
-                'CONVEYANCE' => $request->input('conveyance', 0),
-                'SPECIAL' => $request->input('special_allowance', 0),
-                'PF' => $request->input('provident_fund', 0),
-                'PT' => $request->input('professional_tax', 0),
+                'BASIC' => $basicSalary,
+                'HRA' => (float) $request->input('hra', 0),
+                'CONVEYANCE' => (float) $request->input('conveyance', 0),
+                'SPECIAL' => (float) $request->input('special_allowance', 0),
+                'PF' => $pfAmount,
+                'PT' => (float) $request->input('professional_tax', 0),
+                'TDS' => $otherDeductionsAmount,
             ];
 
             foreach ($salaryInputs as $code => $amt) {

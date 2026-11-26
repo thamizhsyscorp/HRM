@@ -248,81 +248,84 @@
             </a> --}}
         </div>
     @endif
-                <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-100 p-5 sm:p-6 shadow-md flex flex-col justify-between">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span class="text-xs font-extrabold uppercase tracking-wider text-slate-900">Real-Time Geofence Punch Station</span>
-                    </div>
-                    <span id="topLiveClock" class="text-xs font-mono font-bold text-slate-500">
-                        {{ now()->format('h:i:s A') }}
-                    </span>
+
+    @if(!$isSuperAdmin)
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-100 p-5 sm:p-6 shadow-md flex flex-col justify-between">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-900">Real-Time Geofence Punch Station</span>
                 </div>
+                <span id="topLiveClock" class="text-xs font-mono font-bold text-slate-500">
+                    {{ now()->format('h:i:s A') }}
+                </span>
+            </div>
 
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="grid grid-cols-3 gap-3 text-left">
-                        <div>
-                            <span class="block text-[10px] uppercase font-bold text-slate-400">Punch Status</span>
-                            @if(!$myAttendanceToday || !$myAttendanceToday->first_check_in_at)
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900">
-                                    ⏳ Not Punched
-                                </span>
-                            @elseif($myAttendanceToday->first_check_in_at && !$myAttendanceToday->last_check_out_at)
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-900">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span> On Duty
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-800">
-                                    ✓ Punched Out
-                                </span>
-                            @endif
-                        </div>
-                        <div>
-                            <span class="block text-[10px] uppercase font-bold text-slate-400">Check-In</span>
-                            <span class="font-mono font-bold text-xs sm:text-sm text-slate-900">
-                                {{ $myAttendanceToday && $myAttendanceToday->first_check_in_at ? \Carbon\Carbon::parse($myAttendanceToday->first_check_in_at)->format('h:i A') : '—' }}
-                            </span>
-                        </div>
-                        <div>
-                            <span class="block text-[10px] uppercase font-bold text-slate-400">Worked</span>
-                            <span class="font-mono font-bold text-xs sm:text-sm text-[#1e3a8a]">
-                                {{ round(($myAttendanceToday->worked_minutes ?? 0) / 60, 1) }}h
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Live Button -->
-                    <div class="shrink-0 flex items-center gap-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="grid grid-cols-3 gap-3 text-left">
+                    <div>
+                        <span class="block text-[10px] uppercase font-bold text-slate-400">Punch Status</span>
                         @if(!$myAttendanceToday || !$myAttendanceToday->first_check_in_at)
-                            <button type="button" onclick="openQrScanner('check_in')" class="px-5 py-2.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl text-xs font-extrabold shadow-md shadow-indigo-500/20 transition flex items-center gap-2 cursor-pointer">
-                                <span>📷 Scan QR to Check In</span>
-                            </button>
-                            <form action="{{ route('attendance.check-in') }}" method="POST" id="dashCheckInForm" class="hidden">
-                                @csrf
-                                <input type="hidden" name="latitude" id="dashCheckInLat">
-                                <input type="hidden" name="longitude" id="dashCheckInLng">
-                                <input type="hidden" name="accuracy" id="dashCheckInAcc">
-                                <input type="hidden" name="remarks" value="Web Punch-In">
-                            </form>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900">
+                                ⏳ Not Punched
+                            </span>
                         @elseif($myAttendanceToday->first_check_in_at && !$myAttendanceToday->last_check_out_at)
-                            <button type="button" onclick="openQrScanner('check_out')" class="px-5 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-extrabold shadow-sm transition flex items-center gap-2 cursor-pointer">
-                                <span>📷 Scan QR to Check Out</span>
-                            </button>
-                            <form action="{{ route('attendance.check-out') }}" method="POST" id="dashCheckOutForm" class="hidden">
-                                @csrf
-                                <input type="hidden" name="latitude" id="dashCheckOutLat">
-                                <input type="hidden" name="longitude" id="dashCheckOutLng">
-                                <input type="hidden" name="accuracy" id="dashCheckOutAcc">
-                                <input type="hidden" name="remarks" value="Web Punch-Out">
-                            </form>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-900">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span> On Duty
+                            </span>
                         @else
-                            <span class="text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 block text-center">
-                                Shift Complete ✓
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-800">
+                                ✓ Punched Out
                             </span>
                         @endif
                     </div>
+                    <div>
+                        <span class="block text-[10px] uppercase font-bold text-slate-400">Check-In</span>
+                        <span class="font-mono font-bold text-xs sm:text-sm text-slate-900">
+                            {{ $myAttendanceToday && $myAttendanceToday->first_check_in_at ? \Carbon\Carbon::parse($myAttendanceToday->first_check_in_at)->format('h:i A') : '—' }}
+                        </span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] uppercase font-bold text-slate-400">Worked</span>
+                        <span class="font-mono font-bold text-xs sm:text-sm text-[#1e3a8a]">
+                            {{ round(($myAttendanceToday->worked_minutes ?? 0) / 60, 1) }}h
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Live Button -->
+                <div class="shrink-0 flex items-center gap-2">
+                    @if(!$myAttendanceToday || !$myAttendanceToday->first_check_in_at)
+                        <button type="button" onclick="openQrScanner('check_in')" class="px-5 py-2.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl text-xs font-extrabold shadow-md shadow-indigo-500/20 transition flex items-center gap-2 cursor-pointer">
+                            <span>📷 Scan QR to Check In</span>
+                        </button>
+                        <form action="{{ route('attendance.check-in') }}" method="POST" id="dashCheckInForm" class="hidden">
+                            @csrf
+                            <input type="hidden" name="latitude" id="dashCheckInLat">
+                            <input type="hidden" name="longitude" id="dashCheckInLng">
+                            <input type="hidden" name="accuracy" id="dashCheckInAcc">
+                            <input type="hidden" name="remarks" value="Web Punch-In">
+                        </form>
+                    @elseif($myAttendanceToday->first_check_in_at && !$myAttendanceToday->last_check_out_at)
+                        <button type="button" onclick="openQrScanner('check_out')" class="px-5 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-extrabold shadow-sm transition flex items-center gap-2 cursor-pointer">
+                            <span>📷 Scan QR to Check Out</span>
+                        </button>
+                        <form action="{{ route('attendance.check-out') }}" method="POST" id="dashCheckOutForm" class="hidden">
+                            @csrf
+                            <input type="hidden" name="latitude" id="dashCheckOutLat">
+                            <input type="hidden" name="longitude" id="dashCheckOutLng">
+                            <input type="hidden" name="accuracy" id="dashCheckOutAcc">
+                            <input type="hidden" name="remarks" value="Web Punch-Out">
+                        </form>
+                    @else
+                        <span class="text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 block text-center">
+                            Shift Complete ✓
+                        </span>
+                    @endif
                 </div>
             </div>
+        </div>
+    @endif
         <!-- RECENT ACTIVITY & ATTENDANCE LOGS FOR SUPER ADMIN & HR -->
     @if($isSuperAdmin || $isHr)
 
