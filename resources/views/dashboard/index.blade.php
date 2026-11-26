@@ -295,8 +295,21 @@
 
                 <!-- Live Button -->
                 <div class="shrink-0 flex items-center gap-2">
-                    @if(!$myAttendanceToday || !$myAttendanceToday->first_check_in_at)
-                        <button type="button" onclick="openQrScanner('check_in')" class="px-5 py-2.5 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl text-xs font-extrabold shadow-md shadow-indigo-500/20 transition flex items-center gap-2 cursor-pointer">
+                    @if($myLeaveToday)
+                        <div class="text-right">
+                            <span class="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-300 block text-center">
+                                @if($myLeaveToday->status === 'REVOKE_REQUESTED')
+                                    Revocation Pending Approval (Scan Blocked)
+                                @else
+                                    On Leave Today (Scan Blocked)
+                                @endif
+                            </span>
+                            <a href="{{ route('leaves.index') }}" class="text-[11px] font-bold text-[#1e3a8a] hover:underline block text-center mt-1">
+                                {{ $myLeaveToday->status === 'REVOKE_REQUESTED' ? 'View Leave Status' : 'Revoke Leave' }}
+                            </a>
+                        </div>
+                    @elseif(!$myAttendanceToday || !$myAttendanceToday->first_check_in_at)
+                        <button type="button" onclick="openQrScanner('check_in')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-md shadow-emerald-500/20 transition flex items-center gap-2 cursor-pointer">
                             <span>📷 Scan QR to Check In</span>
                         </button>
                         <form action="{{ route('attendance.check-in') }}" method="POST" id="dashCheckInForm" class="hidden">
@@ -307,7 +320,7 @@
                             <input type="hidden" name="remarks" value="Web Punch-In">
                         </form>
                     @elseif($myAttendanceToday->first_check_in_at && !$myAttendanceToday->last_check_out_at)
-                        <button type="button" onclick="openQrScanner('check_out')" class="px-5 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-extrabold shadow-sm transition flex items-center gap-2 cursor-pointer">
+                        <button type="button" onclick="openQrScanner('check_out')" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-extrabold shadow-sm shadow-rose-500/20 transition flex items-center gap-2 cursor-pointer">
                             <span>📷 Scan QR to Check Out</span>
                         </button>
                         <form action="{{ route('attendance.check-out') }}" method="POST" id="dashCheckOutForm" class="hidden">

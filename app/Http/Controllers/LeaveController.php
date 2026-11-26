@@ -77,6 +77,7 @@ class LeaveController extends Controller
         // Metrics
         $pendingCount = LeaveRequest::where('status', 'PENDING')->count();
         $approvedCount = LeaveRequest::where('status', 'APPROVED')->count();
+        $revokeRequestedCount = LeaveRequest::where('status', 'REVOKE_REQUESTED')->count();
         $rejectedCount = LeaveRequest::where('status', 'REJECTED')->count();
 
         return view('leaves.index', compact(
@@ -86,6 +87,7 @@ class LeaveController extends Controller
             'statusFilter',
             'pendingCount',
             'approvedCount',
+            'revokeRequestedCount',
             'rejectedCount',
             'isSuperAdmin',
             'isHr'
@@ -163,21 +165,30 @@ class LeaveController extends Controller
     }
 
     /**
-     * Approve or reject a leave request (HR / Admin only).
+     * Approve, reject, or revoke a leave request (HR, Super Admin, or Reporting Manager).
      */
     public function review(Request $request, LeaveRequest $leaveRequest): RedirectResponse
     {
         $user = Auth::user();
-        if (!$user->hasRole('super-admin') && !$user->hasRole('hr-manager')) {
-            abort(403, 'Unauthorized action. Only HR and Administrators can approve or reject leaves.');
+        $employee = $leaveRequest->employee;
+        $isSuperAdmin = $user->hasRole('super-admin');
+        $isHr = $user->hasRole('hr-manager');
+        $isReportingManager = $employee && $user->employee && (
+            $user->employee->id === $employee->manager_id ||
+            ($user->employee->department_id === $employee->department_id && ($user->hasRole('manager') || $user->hasRole('department-manager') || $user->hasRole('pm')))
+        );
+
+        if (!$isSuperAdmin && !$isHr && !$isReportingManager) {
+            abort(403, 'Unauthorized action. Only HR and Reporting Managers can review leave requests.');
         }
 
         $validated = $request->validate([
-            'status' => ['required', 'string', 'in:APPROVED,REJECTED'],
+            'status' => ['required', 'string', 'in:APPROVED,REJECTED,REVOKED'],
             'review_remarks' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $reviewRemarks = $request->input('review_remarks') ?: "Reviewed by {$user->name}";
+        $reviewRemarks = $request->input('review_remarks') ?: ($validated['status'] === 'REVOKED' ? "Revocation approved by {$user->name}" : "Reviewed by {$user->name}");
+        $oldStatus = $leaveRequest->status;
 
         $leaveRequest->update([
             'status' => $validated['status'],
@@ -191,13 +202,66 @@ class LeaveController extends Controller
             'action' => 'LEAVE_STATUS_' . $validated['status'],
             'auditable_type' => LeaveRequest::class,
             'auditable_id' => $leaveRequest->id,
-            'new_values' => ['status' => $validated['status'], 'review_remarks' => $leaveRequest->review_remarks],
+            'new_values' => ['status' => $validated['status'], 'review_remarks' => $leaveRequest->review_remarks, 'old_status' => $oldStatus],
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'created_at' => now(),
         ]);
 
         $empName = $leaveRequest->employee->full_name ?? 'Employee';
-        return back()->with('success', "Leave request for {$empName} was marked as {$validated['status']}.");
+        $statusMsg = $validated['status'] === 'REVOKED' ? 'Revocation Approved (Cancelled)' : $validated['status'];
+        return back()->with('success', "Leave application for {$empName} has been updated to {$statusMsg}.");
+    }
+
+    /**
+     * Request to revoke an existing leave application (Employee, HR, or Super Admin).
+     */
+    public function revoke(Request $request, LeaveRequest $leaveRequest): RedirectResponse
+    {
+        $user = Auth::user();
+        $employee = $user->employee;
+        $isSuperAdmin = $user->hasRole('super-admin');
+        $isHr = $user->hasRole('hr-manager');
+        $isOwner = $employee && $employee->id === $leaveRequest->employee_id;
+
+        if (!$isOwner && !$isSuperAdmin && !$isHr) {
+            abort(403, 'Unauthorized action. You can only revoke your own leave applications.');
+        }
+
+        if (!in_array($leaveRequest->status, ['PENDING', 'APPROVED', 'REVOKE_REQUESTED'])) {
+            return back()->withErrors(['leave' => 'Only Pending or Approved leave applications can be revoked.']);
+        }
+
+        $reason = $request->input('revoke_reason', 'Employee requested leave revocation');
+
+        if ($leaveRequest->status === 'PENDING') {
+            // Pending requests can be cancelled directly
+            $leaveRequest->update([
+                'status' => 'REVOKED',
+                'review_remarks' => 'Cancelled by employee: ' . $reason,
+                'reviewed_at' => now(),
+            ]);
+            $msg = 'Your pending leave application has been cancelled.';
+        } else {
+            // Approved leave requires HR & Reporting Manager review to revoke
+            $leaveRequest->update([
+                'status' => 'REVOKE_REQUESTED',
+                'review_remarks' => 'Revocation requested: ' . $reason,
+            ]);
+            $msg = 'Leave revocation request submitted. Sent to HR and your Reporting Manager for approval.';
+        }
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'LEAVE_REVOCATION_REQUESTED',
+            'auditable_type' => LeaveRequest::class,
+            'auditable_id' => $leaveRequest->id,
+            'new_values' => ['status' => $leaveRequest->status, 'remarks' => $leaveRequest->review_remarks],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'created_at' => now(),
+        ]);
+
+        return back()->with('success', $msg);
     }
 }

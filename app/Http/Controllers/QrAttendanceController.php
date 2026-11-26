@@ -18,6 +18,9 @@ use Illuminate\View\View;
 
 class QrAttendanceController extends Controller
 {
+    public function __construct(
+        protected QrAttendanceService $qrService
+    ) {}
     /**
      * Dedicated API endpoint returning today's QR code payload and token.
      */
@@ -176,6 +179,25 @@ class QrAttendanceController extends Controller
             }
         }
 
+        // Check if employee has an active approved leave or pending revocation request for today
+        // ONLY after revocation is accepted (status = 'REVOKED') can they mark attendance
+        $activeLeaveToday = \App\Models\LeaveRequest::where('employee_id', $employee->id)
+            ->whereIn('status', ['APPROVED', 'REVOKE_REQUESTED'])
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->first();
+
+        if ($activeLeaveToday) {
+            $msg = $activeLeaveToday->status === 'REVOKE_REQUESTED'
+                ? 'Your leave revocation request is awaiting approval by HR / Reporting Manager. You can mark attendance only after revocation is accepted.'
+                : 'You are on approved leave today (' . ($activeLeaveToday->leaveType->name ?? 'Leave') . '). QR Scan & check-in are blocked. Please submit a leave revocation request in Time-Off if you wish to work today.';
+
+            return response()->json([
+                'status' => 'error',
+                'message' => $msg,
+            ], 422);
+        }
+
         // Retrieve or initialize today's attendance record
         $attendance = Attendance::firstOrCreate(
             ['employee_id' => $employee->id, 'attendance_date' => $today],
@@ -247,6 +269,10 @@ class QrAttendanceController extends Controller
             ]);
 
             $locationNote = $distanceFromOffice !== null ? " ({$distanceFromOffice}m from office)" : "";
+
+            // Single-use QR rotation: immediately disable current QR and generate next version for office kiosk
+            $this->qrService->rotateDailyQr($validation['record'], $user->id);
+
             return response()->json([
                 'status' => 'success',
                 'action' => 'CHECK_IN',
@@ -266,7 +292,9 @@ class QrAttendanceController extends Controller
             }
 
             $firstCheckIn = Carbon::parse($attendance->first_check_in_at);
-            $workedMinutes = max(0, $firstCheckIn->diffInMinutes($now));
+            $elapsedMinutes = max(0, $firstCheckIn->diffInMinutes($now));
+            // Deduct 1 hour (60 minutes) daily for lunch break
+            $workedMinutes = max(0, (int) round($elapsedMinutes - 60));
 
             $attendance->update([
                 'last_check_out_at' => $now,
@@ -305,6 +333,10 @@ class QrAttendanceController extends Controller
             ]);
 
             $hours = round($workedMinutes / 60, 1);
+
+            // Single-use QR rotation: immediately disable current QR and generate next version for office kiosk
+            $this->qrService->rotateDailyQr($validation['record'], $user->id);
+
             return response()->json([
                 'status' => 'success',
                 'action' => 'CHECK_OUT',
@@ -320,5 +352,142 @@ class QrAttendanceController extends Controller
             'status' => 'error',
             'message' => 'Unknown action requested.',
         ], 400);
+    }
+
+    /**
+     * Return recent punches for live kiosk ticker & polling fallback.
+     */
+    public function recentPunches(Request $request): JsonResponse
+    {
+        $today = Carbon::today();
+        $sinceId = (int) $request->query('since_id', 0);
+
+        $events = AttendanceEvent::with(['employee.department', 'employee.designation'])
+            ->whereDate('recorded_at', $today)
+            ->when($sinceId > 0, fn($q) => $q->where('id', '>', $sinceId))
+            ->latest('id')
+            ->take(15)
+            ->get();
+
+        $data = $events->map(function ($event) {
+            $emp = $event->employee;
+            $firstName = $emp ? $emp->first_name : 'Staff';
+            $fullName = $emp ? $emp->full_name : 'Staff Member';
+            $isCheckIn = $event->event_type === 'CHECK_IN';
+
+            return [
+                'id' => $event->id,
+                'employee_id' => $event->employee_id,
+                'first_name' => $firstName,
+                'full_name' => $fullName,
+                'employee_code' => $emp?->employee_code ?? '',
+                'department' => $emp?->department?->name ?? 'Staff',
+                'event_type' => $event->event_type,
+                'type_label' => $isCheckIn ? 'Check In' : 'Check Out',
+                'time' => $event->recorded_at ? $event->recorded_at->format('h:i A') : now()->format('h:i A'),
+                'time_full' => $event->recorded_at ? $event->recorded_at->format('h:i:s A') : now()->format('h:i:s A'),
+                'message' => "{$firstName}, your attendance MARKED!",
+                'avatar_char' => strtoupper(substr($firstName, 0, 1)),
+            ];
+        });
+
+        $activeQr = QrAttendanceService::getOrCreateDailyQr($today->toDateString());
+        $qrSvg = QrAttendanceService::generateSvg($today->toDateString(), 280);
+
+        return response()->json([
+            'status' => 'success',
+            'latest_id' => $events->max('id') ?? $sinceId,
+            'punches' => $data,
+            'active_qr' => [
+                'version' => $activeQr->version,
+                'token' => $activeQr->token,
+                'date' => $activeQr->qr_date ? $activeQr->qr_date->toDateString() : now()->toDateString(),
+                'qr_svg' => $qrSvg,
+            ],
+        ]);
+    }
+
+    /**
+     * Server-Sent Events (SSE) stream for real-time kiosk updates.
+     * Safely releases session lock immediately to prevent blocking concurrent page requests.
+     */
+    public function kioskStream(Request $request)
+    {
+        // Close session immediately so other concurrent browser tabs/requests are not blocked
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        $today = Carbon::today();
+        $lastEventId = (int) ($request->header('Last-Event-ID') ?: $request->query('since_id', AttendanceEvent::whereDate('recorded_at', $today)->max('id') ?? 0));
+
+        // When running under single-threaded PHP built-in server (php artisan serve),
+        // keep cycle to 1s maximum to prevent freezing concurrent requests (login, dashboard, etc.)
+        $isCliServer = php_sapi_name() === 'cli-server';
+        $maxDuration = $isCliServer ? 1 : 20;
+
+        return response()->stream(function () use ($today, $lastEventId, $maxDuration) {
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+
+            $currentLastId = $lastEventId;
+            $startTime = time();
+
+            while (time() - $startTime < $maxDuration) {
+                $newEvents = AttendanceEvent::with(['employee.department', 'employee.designation'])
+                    ->whereDate('recorded_at', $today)
+                    ->where('id', '>', $currentLastId)
+                    ->oldest('id')
+                    ->get();
+
+                foreach ($newEvents as $event) {
+                    $emp = $event->employee;
+                    $firstName = $emp ? $emp->first_name : 'Staff';
+                    $activeQr = QrAttendanceService::getOrCreateDailyQr($today->toDateString());
+                    $qrSvg = QrAttendanceService::generateSvg($today->toDateString(), 280);
+
+                    $payload = json_encode([
+                        'id' => $event->id,
+                        'employee_id' => $event->employee_id,
+                        'first_name' => $firstName,
+                        'full_name' => $emp ? $emp->full_name : 'Staff Member',
+                        'employee_code' => $emp?->employee_code ?? '',
+                        'department' => $emp?->department?->name ?? 'Staff',
+                        'event_type' => $event->event_type,
+                        'type_label' => $event->event_type === 'CHECK_IN' ? 'Check In' : 'Check Out',
+                        'time' => $event->recorded_at ? $event->recorded_at->format('h:i A') : now()->format('h:i A'),
+                        'message' => "{$firstName}, your attendance MARKED!",
+                        'avatar_char' => strtoupper(substr($firstName, 0, 1)),
+                        'active_qr' => [
+                            'version' => $activeQr->version,
+                            'token' => $activeQr->token,
+                            'date' => $activeQr->qr_date ? $activeQr->qr_date->toDateString() : now()->toDateString(),
+                            'qr_svg' => $qrSvg,
+                        ],
+                    ]);
+
+                    echo "id: {$event->id}\n";
+                    echo "event: punch\n";
+                    echo "data: {$payload}\n\n";
+
+                    $currentLastId = $event->id;
+                }
+
+                echo ": ping\n\n";
+                flush();
+
+                if (connection_aborted()) {
+                    break;
+                }
+
+                sleep(1);
+            }
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
     }
 }

@@ -53,9 +53,22 @@ class User extends Authenticatable
         return $this->hasMany(PayrollRun::class, 'approved_by');
     }
 
-    public function hasRole(string $slug): bool
+    public function hasRole(string $slugOrName): bool
     {
-        return $this->roles()->where('slug', $slug)->exists();
+        $clean = strtolower(trim($slugOrName));
+        $slug = \Illuminate\Support\Str::slug($slugOrName);
+
+        return $this->roles()->where(function ($q) use ($clean, $slug, $slugOrName) {
+            $q->where('slug', $slug)
+              ->orWhere('slug', $slugOrName)
+              ->orWhereRaw('LOWER(name) = ?', [$clean])
+              ->orWhereRaw('LOWER(slug) = ?', [$clean]);
+        })->exists();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('super-admin');
     }
 
     public function hasPermission(string $slug): bool

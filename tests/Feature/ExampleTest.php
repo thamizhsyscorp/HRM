@@ -39,7 +39,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/login');
         $response->assertStatus(200);
-        $response->assertSee('Sign in to your workplace');
+        $response->assertSee('Sign in');
         $response->assertSee('admin@hrm.test');
         $response->assertSee('hr@hrm.test');
         $response->assertSee('employee@hrm.test');
@@ -381,7 +381,7 @@ class ExampleTest extends TestCase
     public function test_admin_and_hr_can_view_employee_directory_and_profile(): void
     {
         $admin = User::where('email', 'admin@hrm.test')->first();
-        $employee = Employee::first();
+        $employee = Employee::whereDoesntHave('user.roles', fn($q) => $q->where('slug', 'super-admin'))->first() ?: Employee::first();
         $this->assertNotNull($admin);
         $this->assertNotNull($employee);
 

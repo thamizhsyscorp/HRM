@@ -142,6 +142,7 @@ class DashboardController extends Controller
 
         // Today's attendance for the logged-in employee
         $myAttendanceToday = null;
+        $myLeaveToday = null;
         $myAttendanceEvents = collect();
         $myPendingLeavesCount = 0;
         $myTotalAvailableLeave = 18;
@@ -161,6 +162,12 @@ class DashboardController extends Controller
             $empId = $user->employee->id;
             $myAttendanceToday = Attendance::where('employee_id', $empId)
                 ->whereDate('attendance_date', $today)
+                ->first();
+
+            $myLeaveToday = LeaveRequest::where('employee_id', $empId)
+                ->whereIn('status', ['APPROVED', 'REVOKE_REQUESTED'])
+                ->whereDate('start_date', '<=', $today)
+                ->whereDate('end_date', '>=', $today)
                 ->first();
 
             if ($myAttendanceToday) {
@@ -246,6 +253,7 @@ class DashboardController extends Controller
             'recentEmployees',
             'todayAttendances',
             'myAttendanceToday',
+            'myLeaveToday',
             'myAttendanceEvents',
             'leaveBalances',
             'latestAnnouncement',

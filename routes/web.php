@@ -17,9 +17,11 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-// Dedicated Public/Terminal Attendance Daily QR API
+// Dedicated Public/Terminal Attendance Daily QR API & Real-Time Kiosk Stream
 Route::get('/api/attendance/daily-qr', [QrAttendanceController::class, 'getDailyQr'])->name('api.attendance.daily-qr');
 Route::get('/api/attendance/daily-qr/image', [QrAttendanceController::class, 'getDailyQrImage'])->name('api.attendance.daily-qr.image');
+Route::get('/api/attendance/recent-punches', [QrAttendanceController::class, 'recentPunches'])->name('api.attendance.recent-punches');
+Route::get('/api/attendance/kiosk-stream', [QrAttendanceController::class, 'kioskStream'])->name('api.attendance.kiosk-stream');
 
 // Authentication Routes
 Route::middleware('guest')->group(function () {
@@ -61,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves.index');
     Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');
     Route::post('/leaves/{leaveRequest}/review', [LeaveController::class, 'review'])->name('leaves.review');
+    Route::post('/leaves/{leaveRequest}/revoke', [LeaveController::class, 'revoke'])->name('leaves.revoke');
 
     // Corporate Holidays & Calendar Schedule Management (Super Admin & HR)
     Route::get('/holidays', [HolidayController::class, 'index'])->name('holidays.index');

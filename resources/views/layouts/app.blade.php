@@ -304,7 +304,7 @@
                                         <p class="text-xs font-extrabold text-slate-900 truncate">{{ auth()->user()->name }}</p>
                                         <p class="text-[11px] text-slate-400 truncate">{{ auth()->user()->email }}</p>
                                         <span class="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-[#1e3a8a] border border-blue-200 font-mono">
-                                            {{ auth()->user()->roles->first()->name ?? 'User' }}
+                                            {{ auth()->user()->hasRole('super-admin') ? 'Super Admin • Owner' : (auth()->user()->roles->first()->name ?? 'User') }}
                                         </span>
                                     </div>
                                 </div>
@@ -530,17 +530,73 @@
                     <span class="text-[10px] mt-0.5 tracking-tight">Calendar</span>
                 </a>
 
-                <!-- 3. Prominent Quick Scan QR Button -->
-                <button 
-                    type="button" 
-                    onclick="openQrScanner()" 
-                    class="-mt-5 w-12 h-12 rounded-full bg-[#1e3a8a] hover:bg-[#1e40af] text-white flex items-center justify-center shadow-lg border-2 border-white ring-4 ring-blue-100 active:scale-95 transition cursor-pointer"
-                    title="Scan QR Attendance"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                    </svg>
-                </button>
+                @php
+                    $navUser = auth()->user();
+                    $navEmployee = $navUser?->employee;
+                    $navToday = \Carbon\Carbon::today()->toDateString();
+                    $navAttendanceToday = $navEmployee ? \App\Models\Attendance::where('employee_id', $navEmployee->id)->whereDate('attendance_date', $navToday)->first() : null;
+                    $navOnLeaveToday = $navEmployee ? \App\Models\LeaveRequest::where('employee_id', $navEmployee->id)
+                        ->whereIn('status', ['APPROVED', 'REVOKE_REQUESTED'])
+                        ->whereDate('start_date', '<=', $navToday)
+                        ->whereDate('end_date', '>=', $navToday)
+                        ->first() : null;
+                @endphp
+
+                <!-- 3. Prominent Quick Scan QR Button with Dynamic Status Colors -->
+                @if($navOnLeaveToday)
+                    <!-- On Approved Leave or Revocation Pending: GREY & BLOCKED -->
+                    @php
+                        $alertMsg = $navOnLeaveToday->status === 'REVOKE_REQUESTED'
+                            ? 'Your leave revocation request is awaiting approval from your Reporting Manager or HR. Attendance scanning will unlock once accepted.'
+                            : 'You are on approved leave today (' . ($navOnLeaveToday->leaveType->name ?? 'Leave') . '). QR Scan is blocked.\n\nIf you want to work today, go to Time-Off and click Revoke Leave for HR / Reporting Manager approval.';
+                    @endphp
+                    <button 
+                        type="button" 
+                        onclick="alert('{{ addslashes($alertMsg) }}')" 
+                        class="-mt-5 w-12 h-12 rounded-full bg-slate-400 text-white flex items-center justify-center shadow-md border-2 border-white ring-4 ring-slate-200 cursor-not-allowed opacity-75"
+                        title="{{ $navOnLeaveToday->status === 'REVOKE_REQUESTED' ? 'Revocation Pending Approval (Scan Blocked)' : 'On Leave Today (Scan Blocked)' }}"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                    </button>
+                @elseif($navAttendanceToday && $navAttendanceToday->first_check_in_at && !$navAttendanceToday->last_check_out_at)
+                    <!-- Checked In: RED (Ready to Check Out) -->
+                    <button 
+                        type="button" 
+                        onclick="openQrScanner('check_out')" 
+                        class="-mt-5 w-12 h-12 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-lg shadow-rose-500/30 border-2 border-white ring-4 ring-rose-100 active:scale-95 transition cursor-pointer"
+                        title="Scan QR to Check Out"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                    </button>
+                @elseif(!$navAttendanceToday || !$navAttendanceToday->first_check_in_at)
+                    <!-- Not Checked In (or Revoke Approved): GREEN (Ready to Check In) -->
+                    <button 
+                        type="button" 
+                        onclick="openQrScanner('check_in')" 
+                        class="-mt-5 w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 border-2 border-white ring-4 ring-emerald-100 active:scale-95 transition cursor-pointer"
+                        title="Scan QR to Check In"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                        </svg>
+                    </button>
+                @else
+                    <!-- Shift Completed for Today -->
+                    <button 
+                        type="button" 
+                        onclick="openQrScanner('auto')" 
+                        class="-mt-5 w-12 h-12 rounded-full bg-slate-800 text-emerald-400 flex items-center justify-center shadow-md border-2 border-white ring-4 ring-slate-100 active:scale-95 transition cursor-pointer"
+                        title="Shift Completed ✓"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </button>
+                @endif
 
                 <!-- 4. Payroll / Salary -->
                 <a 
@@ -550,7 +606,7 @@
                     <svg class="w-5 h-5 {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
-                    <span class="text-[10px] mt-0.5 tracking-tight">Salary</span>
+                    <span class="text-[10px] mt-0.5 tracking-tight">{{ auth()->user()->hasRole('super-admin') ? 'Payroll' : 'Salary' }}</span>
                 </a>
 
                 <!-- 5. Drawer Menu / More -->

@@ -183,6 +183,23 @@ class AttendanceController extends Controller
         ]);
 
         $today = Carbon::today();
+
+        // Block check-in if employee has an active approved leave or pending revocation request for today
+        // ONLY after revocation is accepted (status = 'REVOKED') can they mark attendance
+        $activeLeaveToday = LeaveRequest::where('employee_id', $employee->id)
+            ->whereIn('status', ['APPROVED', 'REVOKE_REQUESTED'])
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->first();
+
+        if ($activeLeaveToday) {
+            $msg = $activeLeaveToday->status === 'REVOKE_REQUESTED'
+                ? 'Your leave revocation request is awaiting approval by HR / Reporting Manager. You can mark attendance only after revocation is accepted.'
+                : 'You are on approved leave today (' . ($activeLeaveToday->leaveType->name ?? 'Leave') . '). Attendance check-in is blocked. Please submit a leave revocation request if you need to work today.';
+
+            return back()->withErrors(['attendance' => $msg]);
+        }
+
         $attendance = Attendance::where('employee_id', $employee->id)
             ->whereDate('attendance_date', $today)
             ->first();
@@ -275,7 +292,9 @@ class AttendanceController extends Controller
         }
 
         $checkInTime = Carbon::parse($attendance->first_check_in_at);
-        $workedMinutes = max(0, $checkInTime->diffInMinutes(now()));
+        $elapsedMinutes = max(0, $checkInTime->diffInMinutes(now()));
+        // Deduct 1 hour (60 minutes) daily for lunch break
+        $workedMinutes = max(0, (int) round($elapsedMinutes - 60));
 
         $attendance->update([
             'last_check_out_at' => now(),

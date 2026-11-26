@@ -72,6 +72,33 @@ class QrAttendanceService
     }
 
     /**
+     * Rotate the Daily QR code upon a successful employee scan:
+     * Disables the scanned code so it cannot be reused, and generates a fresh code.
+     */
+    public static function rotateDailyQr(?DailyQrCode $consumedQr = null, ?int $userId = null): DailyQrCode
+    {
+        $targetDate = $consumedQr ? $consumedQr->qr_date->toDateString() : Carbon::today()->toDateString();
+
+        // 1. Disable existing active QR code(s) so they cannot be scanned again
+        DailyQrCode::whereDate('qr_date', $targetDate)->update(['is_active' => false]);
+
+        // 2. Generate a new QR code with an incremented version
+        $lastVersion = DailyQrCode::whereDate('qr_date', $targetDate)->max('version') ?? 0;
+        $version = $lastVersion + 1;
+        $token = 'qr_' . str_replace('-', '', $targetDate) . '_v' . $version . '_' . bin2hex(random_bytes(16));
+        $expiresAt = Carbon::parse($targetDate)->endOfDay();
+
+        return DailyQrCode::create([
+            'qr_date' => $targetDate,
+            'token' => $token,
+            'version' => $version,
+            'expires_at' => $expiresAt,
+            'generated_by' => $userId,
+            'is_active' => true,
+        ]);
+    }
+
+    /**
      * Get the active daily token for a given date.
      */
     public static function getDailyToken(?string $date = null): string
@@ -138,7 +165,7 @@ class QrAttendanceService
         if (!$qr->is_active) {
             return [
                 'valid' => false,
-                'message' => 'This QR code was refreshed by HR/Admin. Please scan the latest active code displayed at the office.',
+                'message' => 'This QR code has already been scanned and expired. Please scan the newly generated QR code on the office screen.',
             ];
         }
 

@@ -114,7 +114,32 @@
 
         <!-- Compensation & Salary Breakdown (7 Cols) -->
         <div class="lg:col-span-7 space-y-6">
-            <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-md">
+            @if($employee->user?->hasRole('super-admin'))
+                <div class="bg-gradient-to-br from-blue-900 to-[#1e3a8a] text-white rounded-2xl p-6 shadow-md border border-blue-800">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-lg">👑</span>
+                        <div>
+                            <h3 class="text-base font-extrabold text-white">Executive Profile — Company Owner</h3>
+                            <p class="text-xs text-blue-200">Executive & Ownership Tier</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-blue-100 leading-relaxed">
+                        This profile belongs to the <strong>Company Owner / Super Admin</strong>. As company executive, this account is exempt from standard workforce time-tracking, attendance mandates, and statutory employee payroll deductions (PF, ESI, Professional Tax).
+                    </p>
+                    <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center gap-2.5">
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[11px] font-bold">
+                            ✓ Workforce Payroll Exempt
+                        </span>
+                        <span class="px-2.5 py-1 rounded-lg bg-white/10 text-blue-200 border border-white/20 text-[11px] font-bold">
+                            ✓ Attendance Mandate Exempt
+                        </span>
+                        <span class="px-2.5 py-1 rounded-lg bg-white/10 text-blue-200 border border-white/20 text-[11px] font-bold">
+                            ✓ Statutory Deduction Exempt
+                        </span>
+                    </div>
+                </div>
+            @else
+                <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-md">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
                     <div>
                         <h3 class="text-sm font-extrabold text-slate-900">Compensation Structure & Salary Breakdown</h3>
@@ -182,6 +207,7 @@
                     </table>
                 </div>
             </div>
+            @endif
 
             <!-- Recent Attendance & Leave History -->
             <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-md">

@@ -299,6 +299,9 @@
                 <a href="{{ route('leaves.index', ['status' => 'APPROVED']) }}" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition {{ $statusFilter === 'APPROVED' ? 'bg-[#1e3a8a] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
                     Approved
                 </a>
+                <a href="{{ route('leaves.index', ['status' => 'REVOKE_REQUESTED']) }}" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition {{ $statusFilter === 'REVOKE_REQUESTED' ? 'bg-[#1e3a8a] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
+                    Revoke Requests ({{ $revokeRequestedCount }})
+                </a>
                 <a href="{{ route('leaves.index', ['status' => 'REJECTED']) }}" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition {{ $statusFilter === 'REJECTED' ? 'bg-[#1e3a8a] text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-700' }}">
                     Rejected
                 </a>
@@ -372,6 +375,15 @@
                                         </svg>
                                         <span>APPROVED</span>
                                     </span>
+                                @elseif($req->status === 'REVOKE_REQUESTED')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                        <span>REVOKE REQUESTED</span>
+                                    </span>
+                                @elseif($req->status === 'REVOKED')
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-700 border border-slate-300">
+                                        <span>REVOKED</span>
+                                    </span>
                                 @elseif($req->status === 'REJECTED')
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-rose-50 text-rose-800 border border-rose-200">
                                         <svg class="w-3 h-3 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -387,27 +399,79 @@
                                 @endif
 
                                 @if($req->reviewed_at)
-                                    <span class="block text-[10px] text-slate-400 font-medium mt-1">HR Review: {{ $req->reviewer->name ?? 'HR' }}</span>
+                                    <span class="block text-[10px] text-slate-400 font-medium mt-1">Review: {{ $req->reviewer->name ?? 'HR/Manager' }}</span>
                                 @endif
                             </td>
                             <td class="py-4 px-6 whitespace-nowrap align-middle text-right">
-                                @if(($isSuperAdmin || $isHr) && $req->status === 'PENDING')
+                                @php
+                                    $canReviewThis = $isSuperAdmin || $isHr || (
+                                        auth()->user()->employee && $req->employee && (
+                                            auth()->user()->employee->id === $req->employee->manager_id ||
+                                            (auth()->user()->employee->department_id === $req->employee->department_id && (auth()->user()->hasRole('manager') || auth()->user()->hasRole('department-manager') || auth()->user()->hasRole('pm')))
+                                        )
+                                    );
+                                    $isReqOwner = auth()->user()->employee && auth()->user()->employee->id === $req->employee_id;
+                                @endphp
+
+                                @if($req->status === 'REVOKE_REQUESTED')
+                                    @if($canReviewThis)
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <form method="POST" action="{{ route('leaves.review', $req) }}" onsubmit="return confirm('Approve leave revocation for {{ $req->employee->full_name }}? The leave will be cancelled and attendance unlocked.')" class="inline">
+                                                @csrf
+                                                <input type="hidden" name="status" value="REVOKED">
+                                                <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition cursor-pointer shadow-2xs">
+                                                    Approve Revoke
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ route('leaves.review', $req) }}" onsubmit="return confirm('Decline revocation? The leave will remain Approved.')" class="inline">
+                                                @csrf
+                                                <input type="hidden" name="status" value="APPROVED">
+                                                <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs transition cursor-pointer shadow-2xs">
+                                                    Decline
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @else
+                                        <span class="text-amber-700 font-bold text-xs">Awaiting Approval</span>
+                                    @endif
+                                @elseif($req->status === 'PENDING')
                                     <div class="flex items-center justify-end gap-1.5">
-                                        <form method="POST" action="{{ route('leaves.review', $req) }}" class="inline">
-                                            @csrf
-                                            <input type="hidden" name="status" value="APPROVED">
-                                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition cursor-pointer shadow-2xs">
-                                                Approve
-                                            </button>
-                                        </form>
-                                        <form method="POST" action="{{ route('leaves.review', $req) }}" class="inline">
-                                            @csrf
-                                            <input type="hidden" name="status" value="REJECTED">
-                                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs transition cursor-pointer shadow-2xs">
-                                                Reject
-                                            </button>
-                                        </form>
+                                        @if($canReviewThis)
+                                            <form method="POST" action="{{ route('leaves.review', $req) }}" class="inline">
+                                                @csrf
+                                                <input type="hidden" name="status" value="APPROVED">
+                                                <button type="submit" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition cursor-pointer shadow-2xs">
+                                                    Approve
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ route('leaves.review', $req) }}" class="inline">
+                                                @csrf
+                                                <input type="hidden" name="status" value="REJECTED">
+                                                <button type="submit" class="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs transition cursor-pointer shadow-2xs">
+                                                    Reject
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if($isReqOwner)
+                                            <form method="POST" action="{{ route('leaves.revoke', $req) }}" onsubmit="return confirm('Cancel this pending leave application?')" class="inline">
+                                                @csrf
+                                                <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold transition cursor-pointer">
+                                                    Cancel
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
+                                @elseif($req->status === 'APPROVED')
+                                    @if($isReqOwner || $isSuperAdmin || $isHr)
+                                        <form method="POST" action="{{ route('leaves.revoke', $req) }}" onsubmit="return confirm('Request to revoke this approved leave? This will be sent to your Reporting Manager and HR for approval.')" class="inline">
+                                            @csrf
+                                            <button type="submit" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold text-xs transition cursor-pointer shadow-2xs">
+                                                Revoke Leave
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-slate-400 text-xs font-mono">No action</span>
+                                    @endif
                                 @else
                                     <span class="text-slate-400 text-xs font-mono">No action</span>
                                 @endif
