@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('name', 120)->unique();
             $table->string('code', 30)->nullable()->unique();
             $table->text('description')->nullable();
+            $table->unsignedBigInteger('manager_employee_id')->nullable();
             $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
         });
@@ -43,6 +44,7 @@ return new class extends Migration {
 
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->unique()->constrained('users')->nullOnDelete();
             $table->string('employee_code', 40)->unique();
             $table->string('first_name', 100);
             $table->string('last_name', 100)->nullable();
@@ -70,10 +72,22 @@ return new class extends Migration {
             $table->index(['department_id', 'employment_status']);
             $table->index(['manager_id', 'employment_status']);
         });
+
+        Schema::table('departments', function (Blueprint $table) {
+            $table->foreign('manager_employee_id')->references('id')->on('employees')->nullOnDelete();
+        });
     }
 
     public function down(): void
     {
+        if (Schema::hasTable('departments')) {
+            Schema::table('departments', function (Blueprint $table) {
+                if (\Illuminate\Support\Facades\DB::getDriverName() !== 'sqlite') {
+                    $table->dropForeign(['manager_employee_id']);
+                }
+            });
+        }
+
         Schema::dropIfExists('employees');
         Schema::dropIfExists('work_locations');
         Schema::dropIfExists('designations');

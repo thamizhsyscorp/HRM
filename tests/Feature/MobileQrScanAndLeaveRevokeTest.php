@@ -325,4 +325,28 @@ class MobileQrScanAndLeaveRevokeTest extends TestCase
         $response->assertSee('Company Payroll Ledger');
         $response->assertDontSee('My Salary & Take-Home');
     }
+
+    public function test_badges_display_for_announcements_and_pending_leave_approvals(): void
+    {
+        $admin = User::where('email', 'admin@hrm.test')->first();
+        [$worker, $employee] = $this->createEmployeeUser('worker_badge@hrm.test');
+        $leaveType = LeaveType::first();
+
+        // Create a pending leave request
+        LeaveRequest::create([
+            'employee_id' => $employee->id,
+            'leave_type_id' => $leaveType->id,
+            'start_date' => now()->addDays(5),
+            'end_date' => now()->addDays(6),
+            'total_days' => 2,
+            'reason' => 'Family vacation',
+            'status' => 'PENDING',
+        ]);
+
+        $response = $this->actingAs($admin)->get('/dashboard');
+        $response->assertStatus(200);
+        $response->assertSee('pending');
+        $response->assertSee('Notifications & Updates', false);
+        $response->assertSee('Leave Approvals Pending');
+    }
 }

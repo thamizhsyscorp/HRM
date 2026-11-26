@@ -98,24 +98,6 @@
                 </div>
             </a>
 
-            <!-- 4. Pending Leaves -->
-            <a href="{{ route('leaves.index', ['status' => 'PENDING']) }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-rose-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs border border-rose-200/60">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                    <span class="text-[9px] sm:text-[10px] font-extrabold text-rose-800 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 font-mono">
-                        ● Review
-                    </span>
-                </div>
-                <div>
-                    <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{{ $pendingLeavesCount }}</span>
-                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-rose-700 transition">Pending Leaves</span>
-                </div>
-            </a>
-
             <!-- 5. Turnout Rate (Spans 2 columns on mobile for balanced grid) -->
             <a href="{{ route('attendance.index') }}" class="col-span-2 sm:col-span-1 bg-gradient-to-r sm:bg-none from-blue-50/50 via-white to-blue-50/30 bg-white p-3 sm:p-3.5 rounded-xl border border-blue-200/70 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
                 <div class="flex items-center justify-between mb-2">
@@ -205,28 +187,6 @@
                     <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-teal-700 transition">Worked Today</span>
                 </div>
             </a>
-
-            <!-- 4. Pending Leaves -->
-            <a href="{{ route('leaves.index') }}" class="bg-white p-3 sm:p-3.5 rounded-xl border border-rose-200/60 sm:border-slate-200/90 shadow-2xs hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs border border-rose-200/60">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                    </div>
-                    <span class="text-[9px] sm:text-[10px] font-extrabold text-rose-800 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 font-mono">
-                        Review
-                    </span>
-                </div>
-                <div>
-                    <span class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight font-mono">
-                        {{ $myPendingLeavesCount ?? 0 }}
-                    </span>
-                    <span class="text-[11px] text-slate-500 font-semibold block mt-0.5 group-hover:text-rose-700 transition">Pending Leaves</span>
-                </div>
-            </a>
-            
-
             <!-- 5. Annual Leave Entitlements -->
             {{-- <a href="{{ route('leaves.index') }}" class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-100 shadow-md hover:-translate-y-0.5 transition duration-150 flex flex-col justify-between group">
                 <div class="flex items-center justify-between mb-3">

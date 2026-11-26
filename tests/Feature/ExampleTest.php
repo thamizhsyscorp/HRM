@@ -444,7 +444,6 @@ class ExampleTest extends TestCase
         $leavesIndexResponse->assertSee('Pending Decisions');
         $leavesIndexResponse->assertSee('Approved Requests');
         $leavesIndexResponse->assertSee('Rejected Requests');
-        $leavesIndexResponse->assertSee('Active Leave Policies');
         $leavesIndexResponse->assertSee('Your Annual Leave Entitlements');
         $leavesIndexResponse->assertSee('Available Balance:');
         $leavesIndexResponse->assertSee('Casual Leave');
@@ -463,9 +462,8 @@ class ExampleTest extends TestCase
 
         $response = $this->actingAs($hrUser)->get('/payroll');
         $response->assertStatus(200);
-        $response->assertSee('Corporate Salary Structures');
-        $response->assertSee('Configured Salary Components');
-        $response->assertSee('Gross Monthly Earnings');
+        $response->assertSee('Staff Salary, Deductions & Take-Home Ledger', false);
+        $response->assertSee('Basic Salary');
     }
 
     /**

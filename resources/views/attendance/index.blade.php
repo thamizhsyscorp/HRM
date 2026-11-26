@@ -43,7 +43,7 @@
             </div>
         </div>
 
-        <form method="GET" action="{{ route('attendance.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <form method="GET" action="{{ route('attendance.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-end">
             @if($isSuperAdmin || $isHr)
                 <!-- HR: Single Attendance Date Filter (Defaults to Today) -->
                 <div>
@@ -69,25 +69,27 @@
                     </select>
                 </div>
             @else
-                <!-- Employee: "This date to this date" Range Filter -->
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">From Date</label>
-                    <input 
-                        type="date" 
-                        name="start_date" 
-                        value="{{ $startDate }}" 
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] bg-white font-mono font-medium text-slate-900"
-                    >
-                </div>
+                <!-- Employee: "This date to this date" Range Filter (2 Columns on Mobile) -->
+                <div class="grid grid-cols-2 gap-2.5 sm:contents">
+                    <div>
+                        <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">From Date</label>
+                        <input 
+                            type="date" 
+                            name="start_date" 
+                            value="{{ $startDate }}" 
+                            class="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] bg-white font-mono font-medium text-slate-900"
+                        >
+                    </div>
 
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">To Date</label>
-                    <input 
-                        type="date" 
-                        name="end_date" 
-                        value="{{ $endDate }}" 
-                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] bg-white font-mono font-medium text-slate-900"
-                    >
+                    <div>
+                        <label class="block text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">To Date</label>
+                        <input 
+                            type="date" 
+                            name="end_date" 
+                            value="{{ $endDate }}" 
+                            class="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-[#1e3a8a] focus:border-[#1e3a8a] bg-white font-mono font-medium text-slate-900"
+                        >
+                    </div>
                 </div>
             @endif
 
@@ -105,98 +107,98 @@
 
             <!-- Buttons -->
             <div class="flex items-center gap-2">
-                <button type="submit" class="flex-1 py-2.5 px-4 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl text-xs font-bold shadow-xs transition">
+                <button type="submit" class="flex-1 py-2.5 px-4 bg-[#1e3a8a] hover:bg-[#1e40af] text-white rounded-xl text-xs font-bold shadow-xs transition cursor-pointer">
                     {{ ($isSuperAdmin || $isHr) ? 'Filter Logs' : 'Filter Range' }}
                 </button>
-                <a href="{{ route('attendance.index') }}" class="py-2.5 px-3 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition text-center bg-white">
+                <a href="{{ route('attendance.index') }}" class="py-2.5 px-3 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition text-center bg-white cursor-pointer">
                     Reset
                 </a>
             </div>
         </form>
     </div>
 
-    <!-- Attendance Metric Summary Cards -->
+    <!-- Attendance Metric Summary Cards: 2 Columns on Mobile, 4 Columns on Desktop -->
     @if($isSuperAdmin || $isHr)
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Date Tracked</span>
-                <div class="mt-2">
-                    <span class="text-xl font-extrabold text-slate-900 font-mono">{{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}</span>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-5">
+            <div class="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-100 shadow-2xs sm:shadow-md flex flex-col justify-between">
+                <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block">Date Tracked</span>
+                <div class="mt-1.5 sm:mt-2">
+                    <span class="text-xs sm:text-xl font-extrabold text-slate-900 font-mono tracking-tight">{{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}</span>
                 </div>
-                <p class="mt-2 text-[11px] text-slate-400 font-medium">Daily attendance roster for today</p>
+                <p class="mt-1 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 font-medium truncate sm:whitespace-normal">Daily roster for today</p>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Present Count</span>
-                <div class="mt-2">
-                    <span class="text-3xl font-extrabold text-slate-900">{{ $presentCount }}</span>
-                    <span class="text-xs text-[#1e3a8a] font-bold ml-2">Verified</span>
+            <div class="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-100 shadow-2xs sm:shadow-md flex flex-col justify-between">
+                <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block">Present Count</span>
+                <div class="mt-1.5 sm:mt-2 flex items-baseline">
+                    <span class="text-xl sm:text-3xl font-extrabold text-slate-900 font-mono">{{ $presentCount }}</span>
+                    <span class="text-[10px] sm:text-xs text-[#1e3a8a] font-bold ml-1.5">Verified</span>
                 </div>
-                <p class="mt-2 text-[11px] text-slate-400 font-medium">Out of {{ $totalActiveEmployees }} total personnel</p>
+                <p class="mt-1 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 font-medium truncate sm:whitespace-normal">Out of {{ $totalActiveEmployees }} personnel</p>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Office Sessions</span>
-                <div class="mt-2">
-                    <span class="text-3xl font-extrabold text-slate-900">{{ $activePunchesCount }}</span>
-                    <span class="text-xs text-[#1e3a8a] font-bold ml-2">Punched In</span>
+            <div class="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-100 shadow-2xs sm:shadow-md flex flex-col justify-between">
+                <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block">Active Office Sessions</span>
+                <div class="mt-1.5 sm:mt-2 flex items-baseline">
+                    <span class="text-xl sm:text-3xl font-extrabold text-slate-900 font-mono">{{ $activePunchesCount }}</span>
+                    <span class="text-[10px] sm:text-xs text-emerald-700 font-bold ml-1.5">On Duty</span>
                 </div>
-                <p class="mt-2 text-[11px] text-[#1e3a8a] font-semibold flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Currently on duty
+                <p class="mt-1 sm:mt-2 text-[10px] sm:text-[11px] text-[#1e3a8a] font-semibold flex items-center gap-1 truncate sm:whitespace-normal">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span> Clocked in now
                 </p>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Turnout Rate</span>
-                <div class="mt-2">
-                    <span class="text-3xl font-extrabold text-slate-900">
+            <div class="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-100 shadow-2xs sm:shadow-md flex flex-col justify-between">
+                <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block">Turnout Rate</span>
+                <div class="mt-1.5 sm:mt-2">
+                    <span class="text-xl sm:text-3xl font-extrabold text-slate-900 font-mono">
                         {{ $totalActiveEmployees > 0 ? round(($presentCount / $totalActiveEmployees) * 100, 1) : 0 }}%
                     </span>
                 </div>
-                <p class="mt-2 text-[11px] text-slate-400 font-medium">Overall workforce attendance today</p>
+                <p class="mt-1 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 font-medium truncate sm:whitespace-normal">Overall turnout today</p>
             </div>
         </div>
     @else
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tracking Window</span>
-                <div class="mt-2">
-                    <span class="text-base sm:text-lg font-extrabold text-slate-900 font-mono">{{ \Carbon\Carbon::parse($startDate)->format('M d') }} — {{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}</span>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-5">
+            <div class="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-100 shadow-2xs sm:shadow-md flex flex-col justify-between">
+                <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block">Tracking Window</span>
+                <div class="mt-1.5 sm:mt-2">
+                    <span class="text-[11px] sm:text-lg font-extrabold text-slate-900 font-mono tracking-tight leading-tight block">{{ \Carbon\Carbon::parse($startDate)->format('M d') }} — {{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}</span>
                 </div>
-                <p class="mt-2 text-[11px] text-slate-400 font-medium">Everyday attendance of this month</p>
+                <p class="mt-1 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 font-medium truncate sm:whitespace-normal">Everyday attendance of this month</p>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Days Present</span>
-                <div class="mt-2">
-                    <span class="text-3xl font-extrabold text-slate-900 font-mono">{{ $employeePresentCount }}</span>
-                    <span class="text-xs text-emerald-700 font-bold ml-2">Verified Days</span>
+            <div class="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-100 shadow-2xs sm:shadow-md flex flex-col justify-between">
+                <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block">Days Present</span>
+                <div class="mt-1.5 sm:mt-2 flex items-baseline">
+                    <span class="text-xl sm:text-3xl font-extrabold text-slate-900 font-mono">{{ $employeePresentCount }}</span>
+                    <span class="text-[10px] sm:text-xs text-emerald-700 font-bold ml-1.5">Verified Days</span>
                 </div>
-                <p class="mt-2 text-[11px] text-slate-400 font-medium">Out of {{ $employeeDaysCount }} total recorded entries</p>
+                <p class="mt-1 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 font-medium truncate sm:whitespace-normal">Out of {{ $employeeDaysCount }} total recorded entries</p>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Hours Worked</span>
-                <div class="mt-2">
-                    <span class="text-3xl font-extrabold text-[#1e3a8a] font-mono">{{ $employeeTotalHours }}</span>
-                    <span class="text-xs text-[#1e3a8a] font-bold ml-1">hrs</span>
+            <div class="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-100 shadow-2xs sm:shadow-md flex flex-col justify-between">
+                <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block">Total Hours Worked</span>
+                <div class="mt-1.5 sm:mt-2 flex items-baseline">
+                    <span class="text-xl sm:text-3xl font-extrabold text-[#1e3a8a] font-mono">{{ $employeeTotalHours }}</span>
+                    <span class="text-[10px] sm:text-xs text-[#1e3a8a] font-bold ml-1">hrs</span>
                 </div>
-                <p class="mt-2 text-[11px] text-slate-400 font-medium">Cumulative worked duration</p>
+                <p class="mt-1 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 font-medium truncate sm:whitespace-normal">Cumulative worked duration</p>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Monthly Attendance Rate</span>
-                <div class="mt-2">
-                    <span class="text-3xl font-extrabold text-slate-900 font-mono">{{ $employeeTurnoutRate }}%</span>
+            <div class="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-100 shadow-2xs sm:shadow-md flex flex-col justify-between">
+                <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block">Monthly Attendance Rate</span>
+                <div class="mt-1.5 sm:mt-2">
+                    <span class="text-xl sm:text-3xl font-extrabold text-slate-900 font-mono">{{ $employeeTurnoutRate }}%</span>
                 </div>
-                <p class="mt-2 text-[11px] text-slate-400 font-medium">Turnout rate in selected period</p>
+                <p class="mt-1 sm:mt-2 text-[10px] sm:text-[11px] text-slate-400 font-medium truncate sm:whitespace-normal">Turnout rate in selected period</p>
             </div>
         </div>
     @endif
 
     <!-- Attendance Table -->
     <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+        <div class="p-3.5 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-white">
             <div>
                 <h3 class="text-sm font-extrabold text-slate-900">
                     {{ ($isSuperAdmin || $isHr) ? 'Daily Workforce Attendance Logs' : 'My Personal Attendance Logs' }}
@@ -209,12 +211,120 @@
                     @endif
                 </p>
             </div>
-            <span class="px-3 py-1 text-xs font-bold rounded-full bg-[#eff6ff] text-[#1e3a8a] border border-[#bfdbfe]">
+            <span class="px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-bold rounded-full bg-[#eff6ff] text-[#1e3a8a] border border-[#bfdbfe] shrink-0">
                 {{ $attendances->count() }} Records Found
             </span>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- Mobile Attendance Cards (Visible on screens < 640px) -->
+        <div class="sm:hidden divide-y divide-slate-100">
+            @forelse($attendances as $att)
+                @php
+                    $attDate = \Carbon\Carbon::parse($att->attendance_date);
+                @endphp
+                <div class="p-3.5 space-y-2.5 bg-white">
+                    <!-- Top Row: Date / Employee Info & Status Badge -->
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-center gap-2.5">
+                            @if($isSuperAdmin || $isHr)
+                                <div class="w-8 h-8 rounded-full bg-[#eff6ff] text-[#1e3a8a] font-bold flex items-center justify-center text-xs shrink-0 border border-[#bfdbfe]">
+                                    {{ strtoupper(substr($att->employee->first_name ?? 'E', 0, 1)) }}
+                                </div>
+                                <div>
+                                    <span class="font-extrabold text-slate-900 text-xs block leading-tight">{{ $att->employee->full_name ?? 'Employee' }}</span>
+                                    <span class="text-[10px] font-mono text-slate-400 block mt-0.5">
+                                        {{ $att->employee->employee_code ?? '' }} &bull; {{ $att->employee->department->name ?? '—' }}
+                                    </span>
+                                </div>
+                            @else
+                                <div class="w-8 h-8 rounded-full bg-indigo-50 text-[#1e3a8a] font-mono font-extrabold flex items-center justify-center text-xs shrink-0 border border-indigo-200">
+                                    {{ $attDate->format('d') }}
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-extrabold text-slate-900 text-xs font-mono leading-tight">{{ $attDate->format('M d, Y') }}</span>
+                                        <span class="text-[10px] font-semibold text-slate-500">({{ $attDate->format('D') }})</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 block mt-0.5">{{ $attDate->isToday() ? 'Today' : $attDate->diffForHumans() }}</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div>
+                            @if($att->status === 'PRESENT')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                    PRESENT
+                                </span>
+                            @elseif($att->status === 'LATE')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+                                    LATE ({{ $att->late_minutes }}m)
+                                </span>
+                            @elseif($att->status === 'HALF_DAY')
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-800 border border-blue-200">
+                                    HALF DAY
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
+                                    {{ $att->status }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Punch Details Grid: Check-In, Check-Out, Hours Worked -->
+                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 grid grid-cols-3 gap-2 text-center text-xs">
+                        <div>
+                            <span class="text-[9px] uppercase font-bold text-slate-400 block">Check-In</span>
+                            <span class="font-mono font-bold text-slate-900 text-[11px] block mt-0.5">
+                                {{ $att->first_check_in_at ? \Carbon\Carbon::parse($att->first_check_in_at)->format('h:i A') : '—' }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] uppercase font-bold text-slate-400 block">Check-Out</span>
+                            <span class="font-mono text-slate-700 text-[11px] block mt-0.5">
+                                {{ $att->last_check_out_at ? \Carbon\Carbon::parse($att->last_check_out_at)->format('h:i A') : ($att->first_check_in_at ? 'Active Duty' : '—') }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] uppercase font-bold text-slate-400 block">Worked</span>
+                            <span class="font-mono font-bold text-[#1e3a8a] text-[11px] block mt-0.5">
+                                {{ round(($att->worked_minutes ?? 0) / 60, 1) }} hrs
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Location & Actions -->
+                    <div class="flex items-center justify-between text-xs pt-0.5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span class="text-[11px] text-slate-600 font-medium">Verified Geofence</span>
+                            @if($att->maps_url)
+                                <a href="{{ $att->maps_url }}" target="_blank" rel="noopener noreferrer" class="text-[#1e3a8a] hover:underline text-[10px] font-bold">
+                                    [Map 📍]
+                                </a>
+                            @endif
+                        </div>
+
+                        @if($isSuperAdmin || $isHr)
+                            <button 
+                                type="button" 
+                                onclick="openEditAttendanceModal({{ $att->id }}, '{{ addslashes($att->employee->full_name ?? '') }}', '{{ $att->first_check_in_at ? \Carbon\Carbon::parse($att->first_check_in_at)->format('H:i') : '' }}', '{{ $att->last_check_out_at ? \Carbon\Carbon::parse($att->last_check_out_at)->format('H:i') : '' }}', '{{ $att->status }}', '{{ addslashes($att->admin_remarks ?? '') }}')"
+                                class="px-2.5 py-1 rounded-lg bg-blue-50 text-[#1e3a8a] border border-blue-200 font-bold text-[11px] cursor-pointer"
+                            >
+                                Edit Time ✎
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <div class="py-8 text-center text-slate-400 text-xs">
+                    No attendance records found for this period.
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Desktop Table (Visible on screens >= 640px) -->
+        <div class="hidden sm:block overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead class="bg-slate-50/90 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[11px] tracking-wider">
                     <tr>

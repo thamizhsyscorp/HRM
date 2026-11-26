@@ -123,6 +123,11 @@
                                     </svg>
                                     <span class="text-[13px]">Announcements</span>
                                 </div>
+                                @if(($badgeRecentAnnouncements ?? 0) > 0)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-[#1e3a8a] border border-blue-200">
+                                        {{ $badgeRecentAnnouncements }} New
+                                    </span>
+                                @endif
                             </a>
                         </div>
                     </div>
@@ -149,6 +154,11 @@
                                     </svg>
                                     <span class="text-[13px]">Leave Requests</span>
                                 </div>
+                                @if((($badgePendingLeaves ?? 0) + ($badgePendingRevocations ?? 0)) > 0)
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500 text-white shadow-xs">
+                                        {{ ($badgePendingLeaves ?? 0) + ($badgePendingRevocations ?? 0) }} pending
+                                    </span>
+                                @endif
                             </a>
 
                             @if(auth()->user()->hasRole('super-admin') || auth()->user()->hasRole('hr-manager'))
@@ -183,7 +193,7 @@
                                     <svg class="w-4 h-4 {{ request()->routeIs('payroll.*') ? 'text-[#1e3a8a]' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
-                                    <span class="text-[13px]">{{ auth()->user()->hasRole('super-admin') ? 'Company Payroll' : (auth()->user()->hasRole('hr-manager') ? 'Workforce Payroll' : 'My Salary & Take-Home') }}</span>
+                                    <span class="text-[13px]">{{ auth()->user()->hasRole('super-admin') ? 'Company Payroll' : (auth()->user()->hasRole('hr-manager') ? 'Workforce Payroll' : ' Payrol') }}</span>
                                 </div>
                                 <span class="text-[9px] font-mono font-extrabold bg-blue-100 text-blue-900 px-1.5 py-0.5 rounded-md">Live</span>
                             </a>
@@ -248,7 +258,7 @@
                             <svg class="w-4 h-4 text-slate-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
                             </svg>
-                            <h1 class="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight truncate max-w-[130px] sm:max-w-none">
+                            <h1 class="text-xs sm:text-sm font-extrabold text-slate-900 tracking-tight truncate max-w-[180px] xs:max-w-[220px] sm:max-w-none">
                                 @yield('page_title', 'Dashboard')
                             </h1>
                         </div>
@@ -260,13 +270,118 @@
                             {{ now()->format('D, M j, Y') }}
                         </span>
 
-                        <!-- Notification Bell -->
-                        <a href="{{ route('announcements.index') }}" class="relative p-1.5 sm:p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-xl transition" title="Bulletins">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                            </svg>
-                            <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500"></span>
-                        </a>
+                        <!-- Notification Bell & Dynamic Popover -->
+                        <div class="relative" id="notificationsDropdownContainer">
+                            <button 
+                                type="button" 
+                                id="notificationsDropdownBtn"
+                                onclick="toggleNotificationsPopover(event)" 
+                                class="relative p-1.5 sm:p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]/20" 
+                                title="Updates & Notifications"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                </svg>
+
+                                @if(($badgeTotalNotifications ?? 0) > 0)
+                                    <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white font-extrabold text-[10px] flex items-center justify-center border-2 border-white shadow-xs">
+                                        {{ ($badgeTotalNotifications ?? 0) > 99 ? '99+' : $badgeTotalNotifications }}
+                                    </span>
+                                @endif
+                            </button>
+
+                            <!-- Notifications Popover Card -->
+                            <div 
+                                id="notificationsPopover" 
+                                class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200 py-3 z-50 transform origin-top-right transition duration-150 max-h-[85vh] flex flex-col"
+                            >
+                                <!-- Header -->
+                                <div class="px-4 pb-2.5 border-b border-slate-100 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-extrabold text-xs text-slate-900">Notifications & Updates</span>
+                                        @if(($badgeTotalNotifications ?? 0) > 0)
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-100 text-rose-700">
+                                                {{ $badgeTotalNotifications }} new
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <a href="{{ route('announcements.index') }}" class="text-[11px] font-bold text-[#1e3a8a] hover:underline">
+                                        All Bulletins
+                                    </a>
+                                </div>
+
+                                <div class="overflow-y-auto divide-y divide-slate-100 p-1.5 space-y-1">
+                                    <!-- 1. Pending Leave Requests Section (if any) -->
+                                    @if(($badgePendingLeaves ?? 0) > 0 || ($badgePendingRevocations ?? 0) > 0)
+                                        <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-[11px] font-black uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                                                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                                                    Leave Approvals Pending
+                                                </span>
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200 text-amber-900 font-mono">
+                                                    {{ ($badgePendingLeaves ?? 0) + ($badgePendingRevocations ?? 0) }} action(s)
+                                                </span>
+                                            </div>
+
+                                            @if(($badgePendingLeaves ?? 0) > 0)
+                                                <div class="flex items-center justify-between text-xs text-amber-950 py-1">
+                                                    <span>Pending leave applications: <strong>{{ $badgePendingLeaves }}</strong></span>
+                                                    <a href="{{ route('leaves.index', ['status' => 'PENDING']) }}" class="text-[11px] font-bold text-[#1e3a8a] hover:underline">
+                                                        Review &rarr;
+                                                    </a>
+                                                </div>
+                                            @endif
+
+                                            @if(($badgePendingRevocations ?? 0) > 0)
+                                                <div class="flex items-center justify-between text-xs text-amber-950 py-1 border-t border-amber-200/60 mt-1">
+                                                    <span>Revocation requests: <strong>{{ $badgePendingRevocations }}</strong></span>
+                                                    <a href="{{ route('leaves.index', ['status' => 'REVOKE_REQUESTED']) }}" class="text-[11px] font-bold text-rose-700 hover:underline">
+                                                        Review &rarr;
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    <!-- 2. Recent Announcements Section -->
+                                    @forelse($badgeRecentAnnouncementItems ?? [] as $bulletin)
+                                        <a href="{{ route('announcements.index') }}" class="block p-2.5 rounded-xl hover:bg-slate-50 transition group">
+                                            <div class="flex items-center justify-between gap-2 mb-1">
+                                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold font-mono tracking-wider {{ $bulletin->priority === 'URGENT' ? 'bg-rose-100 text-rose-800' : ($bulletin->priority === 'HIGH' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-[#1e3a8a]') }}">
+                                                    {{ $bulletin->category }} &bull; {{ $bulletin->priority }}
+                                                </span>
+                                                <span class="text-[10px] text-slate-400 font-mono">
+                                                    {{ $bulletin->created_at->diffForHumans() }}
+                                                </span>
+                                            </div>
+                                            <p class="text-xs font-bold text-slate-800 group-hover:text-[#1e3a8a] line-clamp-1">
+                                                {{ $bulletin->title }}
+                                            </p>
+                                            <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
+                                                {{ Str::limit($bulletin->content, 65) }}
+                                            </p>
+                                        </a>
+                                    @empty
+                                        <div class="p-4 text-center text-slate-400 text-xs">
+                                            No new notifications right now.
+                                        </div>
+                                    @endforelse
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="pt-2 px-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                                    <a href="{{ route('leaves.index') }}" class="text-[#1e3a8a] hover:underline font-bold text-[11px]">
+                                        Time-Off Requests
+                                    </a>
+                                    <a href="{{ route('announcements.index') }}" class="text-[#1e3a8a] hover:underline font-bold text-[11px]">
+                                        All Bulletins &rarr;
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Pop-Style User Profile Trigger & Menu -->
                         <div class="relative" id="profileDropdownContainer">
@@ -304,7 +419,7 @@
                                         <p class="text-xs font-extrabold text-slate-900 truncate">{{ auth()->user()->name }}</p>
                                         <p class="text-[11px] text-slate-400 truncate">{{ auth()->user()->email }}</p>
                                         <span class="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-[#1e3a8a] border border-blue-200 font-mono">
-                                            {{ auth()->user()->hasRole('super-admin') ? 'Super Admin • Owner' : (auth()->user()->roles->first()->name ?? 'User') }}
+                                            {{ auth()->user()->hasRole('super-admin') ? 'Super Admin • Owner' : (auth()->user()->roles->first()->name ?? 'Employee') }}
                                         </span>
                                     </div>
                                 </div>
@@ -323,7 +438,7 @@
                                     </button>
 
                                     @if(auth()->user()->hasRole('super-admin'))
-                                        <!-- Company Owner / Super Admin Items -->
+                                        <!-- Company Owner / Super Admin Items (No Personal Take-Home) -->
                                         <!-- Company Payroll Ledger -->
                                         <a 
                                             href="{{ route('payroll.index') }}" 
@@ -357,6 +472,18 @@
                                             </svg>
                                             <span>Calendar & Holidays</span>
                                         </a>
+                                    @elseif(auth()->user()->hasRole('hr-manager'))
+                                        <!-- HR Manager Items -->
+                                        <!-- Calendar & Holidays -->
+                                        <a 
+                                            href="{{ route('attendance.calendar') }}" 
+                                            class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:text-[#1e3a8a] hover:bg-blue-50 font-semibold transition text-left"
+                                        >
+                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            <span>Calendar & Holidays</span>
+                                        </a>
                                     @else
                                         <!-- Employee Items -->
                                         <!-- My Salary & Take-Home -->
@@ -367,7 +494,7 @@
                                             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                             </svg>
-                                            <span>My Salary & Take-Home</span>
+                                            <span>Payroll</span>
                                         </a>
 
                                         <!-- Calendar & Holidays -->
@@ -499,12 +626,15 @@
                 <button 
                     type="button" 
                     onclick="toggleMobileSidebar()" 
-                    class="flex flex-col items-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                    class="relative flex flex-col items-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-slate-700 transition cursor-pointer"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                     <span class="text-[10px] mt-0.5 tracking-tight">Menu</span>
+                    @if(($badgeTotalNotifications ?? 0) > 0)
+                        <span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
+                    @endif
                 </button>
             @else
                 <!-- Workforce & Employee Mobile Navigation (With Quick Scan QR) -->
@@ -613,12 +743,15 @@
                 <button 
                     type="button" 
                     onclick="toggleMobileSidebar()" 
-                    class="flex flex-col items-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-slate-700 transition cursor-pointer"
+                    class="relative flex flex-col items-center py-1 px-2.5 rounded-xl text-slate-400 hover:text-slate-700 transition cursor-pointer"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                     <span class="text-[10px] mt-0.5 tracking-tight">Menu</span>
+                    @if(($badgeTotalNotifications ?? 0) > 0)
+                        <span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
+                    @endif
                 </button>
             @endif
         </nav>
@@ -798,11 +931,33 @@
             if (chevron) chevron.classList.remove('rotate-180');
         }
 
-        // Close popover when clicking outside
+        function toggleNotificationsPopover(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            closeProfilePopover();
+            const popover = document.getElementById('notificationsPopover');
+            if (!popover) return;
+            popover.classList.toggle('hidden');
+        }
+
+        function closeNotificationsPopover() {
+            const popover = document.getElementById('notificationsPopover');
+            if (popover) {
+                popover.classList.add('hidden');
+            }
+        }
+
+        // Close popovers when clicking outside
         document.addEventListener('click', function(event) {
-            const container = document.getElementById('profileDropdownContainer');
-            if (container && !container.contains(event.target)) {
+            const profileContainer = document.getElementById('profileDropdownContainer');
+            if (profileContainer && !profileContainer.contains(event.target)) {
                 closeProfilePopover();
+            }
+
+            const notifContainer = document.getElementById('notificationsDropdownContainer');
+            if (notifContainer && !notifContainer.contains(event.target)) {
+                closeNotificationsPopover();
             }
         });
 
@@ -811,6 +966,7 @@
             if (event.key === 'Escape') {
                 closeChangePasswordModal();
                 closeProfilePopover();
+                closeNotificationsPopover();
                 closeQrScanner();
             }
         });

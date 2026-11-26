@@ -11,174 +11,166 @@
     {{-- ========================================================================= --}}
     @if(!$isSuperAdmin && !$isHr)
 
-        <!-- Header Greeting -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 sm:p-4.5 rounded-xl border border-slate-200/90 shadow-2xs">
-            <div>
-                <h2 class="text-base font-extrabold text-slate-900">
-                    Salary & Take-Home Overview
-                </h2>
-                <p class="text-xs text-slate-500 mt-0.5">
-                    Your monthly salary breakdown, applicable deductions, and accrued take-home pay based on <strong>{{ $myTakeHomeData['attended_days'] ?? 0 }} days attended</strong> of <strong>{{ $workingDaysInMonth }} working days</strong>.
-                </p>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-mono font-bold">
-                    {{ now()->format('F Y') }} (Day {{ $elapsedDays }} of {{ $daysInMonth }})
-                </span>
-                <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold font-mono">
-                    {{ $myTakeHomeData['attended_days'] ?? 0 }} Days Attended
-                </span>
-            </div>
-        </div>
+        <!-- Top Row: Real-Time Accrual & Monthly Net Pay (Balanced 7 / 5 Grid) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            
+            <!-- Left (7 Cols): Real-Time Take-Home Accrued by Today -->
+            <div class="lg:col-span-7 bg-gradient-to-br from-slate-900 via-[#1e3a8a] to-slate-900 text-white rounded-2xl p-6 sm:p-7 shadow-md border border-blue-900/40 relative overflow-hidden flex flex-col justify-between">
+                <!-- Subtle decorative background radial glow -->
+                <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-blue-400/10 rounded-full blur-2xl pointer-events-none"></div>
 
-        <!-- 3 Primary Clean Metric Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
-            <!-- 1. Basic Salary -->
-            <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Basic Salary</span>
-                    <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#1e3a8a] flex items-center justify-center font-bold text-xs">₹</span>
-                </div>
-                <div class="my-2">
-                    <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
-                        ₹{{ number_format($myBasic > 0 ? $myBasic : ($myTakeHomeData['monthly_gross'] ?? 0), 2) }}
-                    </span>
-                </div>
-                <p class="text-[11px] text-slate-400 font-medium">Monthly base compensation</p>
-            </div>
-
-            <!-- 2. Applicable Deductions -->
-            <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Deductions</span>
-                    @if(($myTakeHomeData['monthly_deductions'] ?? 0) > 0)
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                            Applicable
+                <div>
+                    <div class="my-2">
+                        <span class="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white">
+                            ₹{{ number_format($myTakeHomeData['take_home_by_today'] ?? 0, 2) }}
                         </span>
-                    @else
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                            None Applicable
+                    </div>
+
+                    <p class="text-xs text-slate-300 leading-relaxed max-w-xl">
+                        Your earned take-home salary accrued through today based on <strong>{{ $myTakeHomeData['attended_days'] ?? 0 }} days attended of {{ $workingDaysInMonth }} working days</strong> (paid holidays are included in the amount).
+                    </p>
+                </div>
+
+                <div class="mt-5 pt-4 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                    <span class="text-indigo-200 text-[11px] font-medium">
+                        Daily Earning Rate ({{ $workingDaysInMonth }} working days):
+                    </span>
+                    <span class="font-mono font-extrabold text-emerald-300 text-sm">
+                        ₹{{ number_format($myTakeHomeData['daily_rate'] ?? 0, 2) }} / day
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right (5 Cols): Monthly Take-Home Pay (Net Pay) -->
+            <div class="lg:col-span-5 bg-white rounded-2xl p-6 sm:p-7 border border-emerald-200 shadow-md flex flex-col justify-between relative overflow-hidden bg-gradient-to-b from-emerald-50/50 via-white to-white">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-black text-emerald-900 uppercase tracking-wider">Monthly Take-Home Pay</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-600 text-white shadow-2xs">
+                            Net Pay
                         </span>
-                    @endif
+                    </div>
+
+                    <div class="my-2">
+                        <span class="text-3xl sm:text-4xl font-black text-emerald-800 font-mono tracking-tight">
+                            ₹{{ number_format($myTakeHomeData['monthly_net'] ?? 0, 2) }}
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-emerald-700 font-medium">
+                        Net amount credited to your bank
+                    </p>
                 </div>
-                <div class="my-2">
-                    <span class="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight {{ ($myTakeHomeData['monthly_deductions'] ?? 0) > 0 ? 'text-amber-800' : 'text-slate-400' }}">
-                        ₹{{ number_format($myTakeHomeData['monthly_deductions'] ?? 0, 2) }}
-                    </span>
+
+                <div class="mt-5 pt-4 border-t border-emerald-100 flex items-center justify-between text-xs text-slate-500 font-mono">
+                    <span>Gross: ₹{{ number_format($myTakeHomeData['monthly_gross'] ?? 0, 2) }}</span>
+                    <span class="text-rose-600">- Deductions: ₹{{ number_format($myTakeHomeData['monthly_deductions'] ?? 0, 2) }}</span>
                 </div>
-                <p class="text-[11px] text-slate-400 font-medium">
-                    @if(($myTakeHomeData['monthly_deductions'] ?? 0) > 0)
-                        Statutory EPF & Professional Tax (PT)
-                    @else
-                        Zero deductions — 100% take-home
-                    @endif
-                </p>
             </div>
 
-            <!-- 3. Monthly Take-Home Pay -->
-            <div class="bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 p-4 sm:p-5 rounded-xl border-2 border-emerald-300 shadow-2xs flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Monthly Take-Home Pay</span>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-600 text-white">Net Pay</span>
-                </div>
-                <div class="my-2">
-                    <span class="text-2xl sm:text-3xl font-extrabold text-emerald-900 font-mono tracking-tight">
-                        ₹{{ number_format($myTakeHomeData['monthly_net'] ?? 0, 2) }}
-                    </span>
-                </div>
-                <p class="text-[11px] text-emerald-700 font-semibold">Net amount credited to your bank</p>
-            </div>
         </div>
 
-        <!-- Real-Time Take-Home Accrued by Today Banner -->
-        <div class="bg-gradient-to-r from-slate-900 via-[#1e3a8a] to-slate-900 text-white p-4 sm:p-5 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-                <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                    ⚡ Real-Time Accrual
-                </span>
-                <h3 class="text-xl sm:text-2xl font-extrabold font-mono mt-1.5 text-white">
-                    ₹{{ number_format($myTakeHomeData['take_home_by_today'] ?? 0, 2) }}
-                </h3>
-                <p class="text-xs text-slate-300 mt-1">
-                    Your earned take-home salary accrued through today based on <strong>{{ $myTakeHomeData['attended_days'] ?? 0 }} days attended of {{ $workingDaysInMonth }} working days</strong> (paid holidays are included in the amount).
-                </p>
-            </div>
-            <div class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/10 shrink-0 text-left sm:text-right w-full sm:w-auto">
-                <span class="text-[10px] uppercase font-bold text-indigo-200 block">Daily Earning Rate</span>
-                <span class="text-base font-extrabold font-mono text-emerald-300 block">
-                    ₹{{ number_format($myTakeHomeData['daily_rate'] ?? 0, 2) }} / day
-                </span>
-                <span class="text-[10px] text-indigo-200/80">Calculated over {{ $workingDaysInMonth }} working days</span>
-            </div>
-        </div>
-
-        <!-- Deductions & Earnings Itemized Breakdown -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Deductions Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2.5">
-                    <h4 class="text-xs font-extrabold text-slate-900">Deductions Breakdown</h4>
-                    <span class="text-xs font-mono font-bold text-amber-800">
-                        Total: ₹{{ number_format($myTakeHomeData['monthly_deductions'] ?? 0, 2) }}
-                    </span>
-                </div>
-
-                @if($myDeductionsList->count() > 0 && ($myTakeHomeData['monthly_deductions'] ?? 0) > 0)
-                    <div class="divide-y divide-slate-100 text-xs">
-                        @foreach($myDeductionsList as $ded)
-                            <div class="py-2.5 flex items-center justify-between">
-                                <div>
-                                    <span class="font-bold text-slate-800 block">{{ $ded->salaryComponent->name }}</span>
-                                    <span class="text-[10px] text-slate-400 font-mono">{{ $ded->salaryComponent->code }}</span>
-                                </div>
-                                <span class="font-mono font-bold text-amber-800">
-                                    - ₹{{ number_format($ded->amount, 2) }}
-                                </span>
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="py-8 text-center text-slate-400 text-xs">
-                        <span class="text-2xl block mb-1">🎉</span>
-                        No deductions applicable to your salary.
-                    </div>
-                @endif
-            </div>
+        <!-- Bottom Row: Earnings Components & Deductions Breakdown (Balanced 2-Column Split) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
 
             <!-- Earnings Card -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 mb-2.5">
-                    <h4 class="text-xs font-extrabold text-slate-900">Earnings Components</h4>
-                    <span class="text-xs font-mono font-bold text-emerald-800">
-                        Gross: ₹{{ number_format($myTakeHomeData['monthly_gross'] ?? 0, 2) }}
-                    </span>
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-blue-50 text-[#1e3a8a] flex items-center justify-center font-bold text-sm">
+                                ₹
+                            </span>
+                            <div>
+                                <h4 class="text-sm font-extrabold text-slate-900">Earnings Components</h4>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-xl text-xs font-mono font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200">
+                            Gross: ₹{{ number_format($myTakeHomeData['monthly_gross'] ?? 0, 2) }}
+                        </span>
+                    </div>
+
+                    @php
+                        $myEarnings = $mySalaryComponents->where('salaryComponent.category', 'EARNING');
+                    @endphp
+
+                    @if($myEarnings->count() > 0)
+                        <div class="divide-y divide-slate-100 text-xs">
+                            @foreach($myEarnings as $earn)
+                                <div class="py-3 flex items-center justify-between hover:bg-slate-50/60 px-2 rounded-lg transition">
+                                    <div>
+                                        <span class="font-bold text-slate-800 block text-xs">{{ $earn->salaryComponent->name }}</span>
+                                        <span class="text-[10px] text-slate-400 font-mono">{{ $earn->salaryComponent->code }}</span>
+                                    </div>
+                                    <span class="font-mono font-bold text-slate-900 text-xs">
+                                        + ₹{{ number_format($earn->amount, 2) }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="py-3 flex items-center justify-between text-xs px-2">
+                            <span class="font-bold text-slate-800">Basic Salary</span>
+                            <span class="font-mono font-bold text-slate-900">+ ₹{{ number_format($myBasic, 2) }}</span>
+                        </div>
+                    @endif
                 </div>
 
-                @php
-                    $myEarnings = $mySalaryComponents->where('salaryComponent.category', 'EARNING');
-                @endphp
-
-                @if($myEarnings->count() > 0)
-                    <div class="divide-y divide-slate-100 text-xs">
-                        @foreach($myEarnings as $earn)
-                            <div class="py-2.5 flex items-center justify-between">
-                                <div>
-                                    <span class="font-bold text-slate-800 block">{{ $earn->salaryComponent->name }}</span>
-                                    <span class="text-[10px] text-slate-400 font-mono">{{ $earn->salaryComponent->code }}</span>
-                                </div>
-                                <span class="font-mono font-bold text-slate-900">
-                                    + ₹{{ number_format($earn->amount, 2) }}
-                                </span>
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="py-2.5 flex items-center justify-between text-xs">
-                        <span class="font-bold text-slate-800">Basic Salary</span>
-                        <span class="font-mono font-bold text-slate-900">₹{{ number_format($myBasic, 2) }}</span>
-                    </div>
-                @endif
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs px-2">
+                    <span class="text-slate-500 font-semibold">Total Monthly Gross</span>
+                    <span class="font-mono font-black text-slate-900 text-sm">
+                        ₹{{ number_format($myTakeHomeData['monthly_gross'] ?? 0, 2) }}
+                    </span>
+                </div>
             </div>
+
+            <!-- Deductions Card -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-sm">
+                                %
+                            </span>
+                            <div>
+                                <h4 class="text-sm font-extrabold text-slate-900">Deductions Breakdown</h4>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 rounded-xl text-xs font-mono font-extrabold text-rose-700 bg-rose-50 border border-rose-200">
+                            Total: ₹{{ number_format($myTakeHomeData['monthly_deductions'] ?? 0, 2) }}
+                        </span>
+                    </div>
+
+                    @if($myDeductionsList->count() > 0 && ($myTakeHomeData['monthly_deductions'] ?? 0) > 0)
+                        <div class="divide-y divide-slate-100 text-xs">
+                            @foreach($myDeductionsList as $ded)
+                                <div class="py-3 flex items-center justify-between hover:bg-slate-50/60 px-2 rounded-lg transition">
+                                    <div>
+                                        <span class="font-bold text-slate-800 block text-xs">{{ $ded->salaryComponent->name }}</span>
+                                        <span class="text-[10px] text-slate-400 font-mono">{{ $ded->salaryComponent->code }}</span>
+                                    </div>
+                                    <span class="font-mono font-bold text-rose-600 text-xs">
+                                        - ₹{{ number_format($ded->amount, 2) }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="py-8 text-center text-slate-400 text-xs">
+                            <span class="text-2xl block mb-1">🎉</span>
+                            No deductions applicable to your salary.
+                        </div>
+                    @endif
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs px-2">
+                    <span class="text-slate-500 font-semibold">Total Monthly Deductions</span>
+                    <span class="font-mono font-black text-rose-600 text-sm">
+                        - ₹{{ number_format($myTakeHomeData['monthly_deductions'] ?? 0, 2) }}
+                    </span>
+                </div>
+            </div>
+
         </div>
 
     {{-- ========================================================================= --}}
@@ -357,7 +349,6 @@
                                 <!-- Take-Home by Today -->
                                 <td class="py-4 px-5 font-mono font-extrabold text-sm text-[#1e3a8a] text-right">
                                     ₹{{ number_format($eth['take_home_by_today'], 2) }}
-                                    <span class="text-[10px] text-emerald-700 font-semibold block font-sans">Paid holidays included</span>
                                 </td>
                             </tr>
                         @empty
@@ -371,76 +362,6 @@
                 </table>
             </div>
         </div>
-
-        <!-- Corporate Settings & Structures (Clean Collapsible/Tab Bottom Cards) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4">
-            <!-- Active Salary Components Breakdown -->
-            <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-extrabold text-slate-900">Configured Salary Components</h3>
-                        <p class="text-xs text-slate-400">Company earning and deduction rules</p>
-                    </div>
-                    <span class="text-xs font-bold text-[#1e3a8a] bg-[#eff6ff] px-2.5 py-1 rounded-full border border-[#bfdbfe]">
-                        {{ $earnings->count() + $deductions->count() }} Components
-                    </span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
-                            <tr>
-                                <th class="py-3 px-4">Code</th>
-                                <th class="py-3 px-4">Component Name</th>
-                                <th class="py-3 px-4">Category</th>
-                                <th class="py-3 px-4">Type</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-slate-700">
-                            @foreach($earnings as $earn)
-                                <tr>
-                                    <td class="py-3 px-4 font-mono font-bold text-slate-900">{{ $earn->code }}</td>
-                                    <td class="py-3 px-4 font-semibold text-slate-800">{{ $earn->name }}</td>
-                                    <td class="py-3 px-4">
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200">EARNING</span>
-                                    </td>
-                                    <td class="py-3 px-4 font-mono text-slate-500">{{ $earn->calculation_type }}</td>
-                                </tr>
-                            @endforeach
-                            @foreach($deductions as $ded)
-                                <tr>
-                                    <td class="py-3 px-4 font-mono font-bold text-amber-800">{{ $ded->code }}</td>
-                                    <td class="py-3 px-4 font-semibold text-slate-800">{{ $ded->name }}</td>
-                                    <td class="py-3 px-4">
-                                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200">DEDUCTION</span>
-                                    </td>
-                                    <td class="py-3 px-4 font-mono text-slate-500">{{ $ded->calculation_type }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Corporate Salary Structures -->
-            <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-                <h3 class="text-sm font-extrabold text-slate-900 mb-3 border-b border-slate-100 pb-3">Corporate Salary Structures</h3>
-                <div class="space-y-3">
-                    @forelse($salaryStructures as $struct)
-                        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                            <div class="flex items-center justify-between">
-                                <h4 class="text-xs font-extrabold text-slate-900">{{ $struct->name }}</h4>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#eff6ff] text-[#1e3a8a] font-mono">{{ $struct->currency }}</span>
-                            </div>
-                            <p class="text-[11px] text-slate-500 mt-1">{{ $struct->description }}</p>
-                        </div>
-                    @empty
-                        <p class="text-slate-400 text-xs">No salary structure configured.</p>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-
     @endif
 
 </div>

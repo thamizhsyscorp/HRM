@@ -23,7 +23,6 @@
                             {{ $employee->employee_code }}
                         </span>
                     </div>
-                    <p class="text-xs text-[#1e3a8a] font-bold mt-1">{{ $employee->designation->name ?? 'Staff Role' }} &bull; {{ $employee->department->name ?? 'General' }}</p>
                     <p class="text-xs text-slate-400 mt-0.5 font-mono">{{ $employee->work_email }} &bull; {{ $employee->phone ?? 'No phone' }}</p>
                 </div>
             </div>
@@ -208,40 +207,6 @@
                 </div>
             </div>
             @endif
-
-            <!-- Recent Attendance & Leave History -->
-            <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-md">
-                <h3 class="text-sm font-extrabold text-slate-900 mb-3 border-b border-slate-100 pb-3">Recent Daily Punches</h3>
-                <div class="space-y-2 text-xs">
-                    @forelse($employee->attendances as $att)
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/60">
-                            <div>
-                                <span class="font-extrabold text-slate-900">{{ \Carbon\Carbon::parse($att->attendance_date)->format('M d, Y') }}</span>
-                                <span class="text-slate-400 text-[11px] ml-2">In: {{ $att->first_check_in_at ? \Carbon\Carbon::parse($att->first_check_in_at)->format('h:i A') : '—' }}</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#eff6ff] text-[#1e3a8a] border border-[#bfdbfe]">
-                                    {{ $att->status }} ({{ round(($att->worked_minutes ?? 0)/60, 1) }} hrs)
-                                </span>
-                                <a 
-                                    href="{{ $att->maps_url }}" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    class="p-1 rounded-lg bg-white hover:bg-blue-50 text-[#1e3a8a] border border-slate-200 transition shadow-2xs group inline-flex items-center justify-center cursor-pointer" 
-                                    title="View registered GPS location on Google Maps"
-                                >
-                                    <svg class="w-3.5 h-3.5 text-[#1e3a8a] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                    @empty
-                        <p class="text-slate-400 text-xs py-4 text-center">No attendance punches recorded yet.</p>
-                    @endforelse
-                </div>
-            </div>
         </div>
 
     </div>

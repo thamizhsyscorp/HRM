@@ -81,37 +81,6 @@
             </div>
         </form>
     </div>
-
-    <!-- Metric Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Workforce</span>
-            <div class="mt-2">
-                <span class="text-3xl font-extrabold text-slate-900">{{ $totalEmployees }}</span>
-                <span class="text-xs text-[#1e3a8a] font-bold ml-2">Registered</span>
-            </div>
-            <p class="mt-2 text-[11px] text-slate-400 font-medium">Synchronized with authenticatable user credentials</p>
-        </div>
-
-        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Employees</span>
-            <div class="mt-2">
-                <span class="text-3xl font-extrabold text-slate-900">{{ $activeCount }}</span>
-                <span class="text-xs text-[#1e3a8a] font-bold ml-2">On Payroll</span>
-            </div>
-            <p class="mt-2 text-[11px] text-slate-400 font-medium">Eligible for daily attendance tracking</p>
-        </div>
-
-        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md flex flex-col justify-between">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Departments</span>
-            <div class="mt-2">
-                <span class="text-3xl font-extrabold text-slate-900">{{ $departments->count() }}</span>
-                <span class="text-xs text-[#1e3a8a] font-bold ml-2">Functional Units</span>
-            </div>
-            <p class="mt-2 text-[11px] text-slate-400 font-medium">Corporate structural hierarchy</p>
-        </div>
-    </div>
-
     <!-- Employee Directory Table -->
     <div class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
         <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
@@ -119,11 +88,6 @@
                 <h3 class="text-sm font-extrabold text-slate-900">Workforce Directory</h3>
                 <p class="text-xs text-slate-400">Employee personnel profiles, organization placements, and status</p>
             </div>
-            @if($isSuperAdmin || $isHr)
-                <a href="{{ route('employees.create') }}" class="px-3.5 py-1.5 rounded-xl bg-[#1e3a8a] hover:bg-[#1e40af] text-white text-xs font-bold shadow-xs transition">
-                    + Onboard Staff
-                </a>
-            @endif
         </div>
 
         <div class="overflow-x-auto">
